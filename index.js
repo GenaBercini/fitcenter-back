@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-dotenv.config();
 import express from "express";
 import sequelize from './config/database.js';
 import cors from 'cors';
@@ -21,44 +20,34 @@ const swaggerFile = JSON.parse(fs.readFileSync('./config/swagger_output.json', '
 
 
 const server = express();
-server.use(express.json());
-server.set('port', 3000);
-server.use(cors({
-    origin: '*',
-    credentials: true,
-  }));
-  
-server.use('/categories', categoriesRoutes);
-server.use('/products', productsRoutes);
-server.use('/users', usersRoutes);
-server.use('/memberships', membershipsRoutes);
-server.use('/booking', bookingRoutes); 
-server.use("/subsidiary", subsidiaryRoutes); 
-server.use('/exercises',exercisesRoutes);
-server.use('/routines',routinesRoutes);
+server.set("port", 3000);
 
+// Middlewares
 server.use(express.json({ limit: '10mb' }));
 server.use(express.urlencoded({ limit: '10mb', extended: true }));
-server.set("port", 3000);
-server.use(
-  cors({
-    origin: 'http://localhost:5173',
-    credentials: true,
-  })
-);
 server.use(cookieParser());
-server.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+server.use(cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  }));
 
-server.use("/categories", categoriesRoutes);
-server.use("/products", productsRoutes);
-server.use("/users", usersRoutes);
-server.use("/memberships", membershipsRoutes);
-server.use("/booking", bookingRoutes);
-server.use("/subsidiary", subsidiaryRoutes);
-server.use("/exercises", exercisesRoutes);
-server.use("/routines", routinesRoutes);
-server.use(errorHandler);
+// Rutas
+  server.use("/categories", categoriesRoutes);
+  server.use("/products", productsRoutes);
+  server.use("/users", usersRoutes);
+  server.use("/memberships", membershipsRoutes);
+  server.use("/booking", bookingRoutes);
+  server.use("/subsidiary", subsidiaryRoutes);
+  server.use("/exercises", exercisesRoutes);
+  server.use("/routines", routinesRoutes);
+  
+  // Documentacion con Swagger
+  server.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+  
+// Manejador de errores
+  server.use(errorHandler);
 
+// Sincronizar modelos y arrancar servidor
 (async () => {
   try {
     await sequelize.authenticate();
@@ -67,8 +56,8 @@ server.use(errorHandler);
     await sequelize.sync({ alter: true });
     console.log("🛠️ Modelos sincronizados");
 
-    app.listen(app.get("port"), () => {
-      console.log("Servidor corriendo en el puerto", app.get("port"));
+    server.listen(server.get("port"), () => {
+      console.log("Servidor corriendo en el puerto", server.get("port"));
     });
   } catch (error) {
     console.error("❌ Error conectando a la base de datos:", error);

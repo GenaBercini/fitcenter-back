@@ -286,5 +286,6 @@ const userController = {
       next(error);
     }
     },
-
 }
+
+export default userController;
