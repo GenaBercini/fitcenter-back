@@ -39,6 +39,7 @@ const User = sequelize.define(
     image_url: {
       type: DataTypes.STRING,
       allowNull: true,
+      defaultValue: "https://bit.ly/broken-link"
     },
     banned: {
       type: DataTypes.BOOLEAN,

@@ -4,7 +4,7 @@ import {
   updateUserImage,
   createUserImage,
 } from "../../utils/supabase.config.js";
-import ErrorResponse from "../../utils/errorHandler.js";
+import ErrorResponse from "../../utils/errorConstructor.js";
 
 const userController = {
   createUser: async (req, res, next) => {
@@ -43,9 +43,18 @@ const userController = {
         maxAge: 1000 * 60 * 60 * 24, // 1 día
       });
 
-      const result = await createUserImage(supabase, data.user.id, image);
-      if (!result.success)
-        return next(new ErrorResponse("Error al subir imagen", 400));
+      let imageDefinitive = image;
+      if (
+        image !=
+        "https://cgkwvxeecaiaejwsuurm.supabase.co/storage/v1/object/public/user-images/public/4b194a8e-e783-4d30-8da4-3719363e89a8.png"
+      ) {
+        const result = await createUserImage(supabase, data.user.id, image);
+        if (!result.success) {
+          return next(new ErrorResponse("Error al subir imagen", 400));
+        } else {
+          imageDefinitive = result.url;
+        }
+      }
 
       const newUser = await User.create({
         first_name,
@@ -53,7 +62,11 @@ const userController = {
         address,
         phone,
         email,
-        });
+        uid: data.user.id,
+        role,
+        registration_number: role === "professor" ? registration_number : null,
+        image_url: imageDefinitive,
+      });
 
       res.status(201).json({
         success: true,
@@ -63,7 +76,7 @@ const userController = {
     } catch (error) {
       next(error);
     }
-    },
+  },
   getAllUsers: async (req, res, next) => {
     try {
       const users = await User.findAll();
@@ -75,7 +88,7 @@ const userController = {
     } catch (error) {
       next(error);
     }
-    },
+  },
   getUserById: async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -92,7 +105,7 @@ const userController = {
     } catch (error) {
       next(error);
     }
-    },
+  },
   updateUser: async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -153,7 +166,7 @@ const userController = {
     } catch (error) {
       next(error);
     }
-    },
+  },
   deleteUser: async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -285,7 +298,7 @@ const userController = {
     } catch (error) {
       next(error);
     }
-    },
-}
+  },
+};
 
 export default userController;
