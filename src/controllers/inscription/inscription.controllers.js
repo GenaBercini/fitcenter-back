@@ -122,7 +122,8 @@ const inscriptionController = {
         where: { userId },
         include: [Activity, Schedule],
       });
-      res.json(inscriptions);
+      // res.json(inscriptions);
+      res.json({ data: inscriptions });
     } catch (err) {
       console.error(err);
       res.status(500).json({ success: false, message: "Database error" });
