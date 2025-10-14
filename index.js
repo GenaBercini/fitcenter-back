@@ -14,6 +14,7 @@ import exercisesRoutes from "./src/routes/routes.exercise.js";
 import routinesRoutes from "./src/routes/routes.routines.js";
 import bookingRoutes from "./src/routes/routes.booking.js";
 import subsidiaryRoutes from "./src/routes/routes.subsidiary.js";
+import cartRouter from "./src/routes/routes.cart.js";
 
 dotenv.config();
 const swaggerFile = JSON.parse(fs.readFileSync('./config/swagger_output.json', 'utf-8'));
@@ -40,6 +41,7 @@ server.use(cors({
   server.use("/subsidiary", subsidiaryRoutes);
   server.use("/exercises", exercisesRoutes);
   server.use("/routines", routinesRoutes);
+  server.use("/cart", cartRouter);
   
   // Documentacion con Swagger
   server.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
