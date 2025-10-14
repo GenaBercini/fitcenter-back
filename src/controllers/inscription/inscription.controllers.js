@@ -1,103 +1,160 @@
-import Activity from "../../models/activities.js";
-import Inscription from "../../models/inscription.js";
+// controllers/inscription/inscription.controllers.js
+import Activity from "../../models/Activities.js";
+import Schedule from "../../models/Schedule.js";
+import Inscription from "../../models/Inscription.js";
+import User from "../../models/User.js";
+import { Op } from "sequelize";
 
 const inscriptionController = {
-  // Crear inscripción
+  // Create inscription (activity or schedule)
   createInscription: async (req, res) => {
     try {
-      const { activityId, userName } = req.body;
+      const { userId, activityId, scheduleId, type } = req.body;
 
-      // Buscar actividad
-      const activity = await Activity.findByPk(activityId);
-      if (!activity) {
+      const user = await User.findByPk(userId);
+      if (!user) {
         return res
           .status(404)
-          .json({ success: false, message: "Actividad no encontrada" });
+          .json({ success: false, message: "User not found" });
       }
 
-      // Validar cupo
-      if (activity.capacity <= 0) {
-        return res
-          .status(400)
-          .json({ success: false, message: "No quedan cupos disponibles" });
-      }
+      // Handle activity inscription
+      if (type === "activity") {
+        const activity = await Activity.findByPk(activityId);
+        if (!activity)
+          return res
+            .status(404)
+            .json({ success: false, message: "Activity not found" });
 
-      // Evitar doble inscripción
-      const already = await Inscription.findOne({
-        where: { activityId, userName },
-      });
-      if (already) {
-        return res.status(400).json({
-          success: false,
-          message: "Ya estás inscripto en esta actividad",
+        if (activity.capacity <= 0)
+          return res
+            .status(400)
+            .json({ success: false, message: "No available spots" });
+
+        const already = await Inscription.findOne({
+          where: { userId, type: "activity" },
+        });
+        if (already)
+          return res
+            .status(400)
+            .json({ success: false, message: "You already have an activity" });
+
+        const inscription = await Inscription.create({
+          userId,
+          activityId,
+          type: "activity",
+        });
+
+        activity.capacity -= 1;
+        await activity.save();
+
+        return res.json({
+          success: true,
+          message: `Enrolled in ${activity.name}`,
+          inscription,
         });
       }
 
-      // Crear inscripción
-      const inscription = await Inscription.create({ activityId, userName });
+      // Handle schedule inscription
+      if (type === "schedule") {
+        const schedule = await Schedule.findByPk(scheduleId);
+        if (!schedule)
+          return res
+            .status(404)
+            .json({ success: false, message: "Schedule not found" });
 
-      // Restar cupo
-      activity.capacity -= 1;
-      await activity.save();
+        if (schedule.capacity <= 0)
+          return res
+            .status(400)
+            .json({ success: false, message: "No available spots" });
 
-      return res.json({
-        success: true,
-        message: `Inscripción confirmada en ${activity.name}`,
-        inscription,
-      });
+        // User can't have more than 3 schedules
+        const userSchedules = await Inscription.findAll({
+          where: { userId, type: "schedule" },
+          include: { model: Schedule },
+        });
+
+        if (userSchedules.length >= 3)
+          return res
+            .status(400)
+            .json({ success: false, message: "You already have 3 schedules" });
+
+        // User can't have another schedule the same day
+        const sameDay = userSchedules.find(
+          (insc) => insc.Schedule.day === schedule.day
+        );
+        if (sameDay)
+          return res.status(400).json({
+            success: false,
+            message: "You already have a schedule that day",
+          });
+
+        const inscription = await Inscription.create({
+          userId,
+          scheduleId,
+          type: "schedule",
+        });
+
+        schedule.capacity -= 1;
+        await schedule.save();
+
+        return res.json({
+          success: true,
+          message: "Schedule booked successfully",
+          inscription,
+        });
+      }
+
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid inscription type" });
     } catch (err) {
       console.error(err);
-      return res
-        .status(500)
-        .json({ success: false, message: "Error en la base de datos" });
+      res.status(500).json({ success: false, message: "Database error" });
     }
   },
 
-  // Obtener inscripciones de un usuario
+  // Get all inscriptions of a user
   getInscriptionsByUser: async (req, res) => {
     try {
-      const { userName } = req.params;
+      const { userId } = req.params;
       const inscriptions = await Inscription.findAll({
-        where: { userName },
-        include: { model: Activity }, // incluye datos de la actividad
+        where: { userId },
+        include: [Activity, Schedule],
       });
-
-      return res.json(inscriptions);
+      res.json(inscriptions);
     } catch (err) {
       console.error(err);
-      return res
-        .status(500)
-        .json({ success: false, message: "Error en la base de datos" });
+      res.status(500).json({ success: false, message: "Database error" });
     }
   },
+
+  // Delete inscription
   deleteInscription: async (req, res) => {
     try {
       const { id } = req.params;
+      const inscription = await Inscription.findByPk(id, {
+        include: [Activity, Schedule],
+      });
 
-      // Buscar inscripción
-      const inscription = await Inscription.findByPk(id);
-      if (!inscription) {
+      if (!inscription)
         return res
           .status(404)
-          .json({ success: false, message: "Inscripción no encontrada" });
+          .json({ success: false, message: "Inscription not found" });
+
+      // Restore capacity
+      if (inscription.type === "activity" && inscription.Activity) {
+        inscription.Activity.capacity += 1;
+        await inscription.Activity.save();
       }
 
-      // Buscar la actividad asociada
-      const activity = await Activity.findByPk(inscription.activityId);
+      if (inscription.type === "schedule" && inscription.Schedule) {
+        inscription.Schedule.capacity += 1;
+        await inscription.Schedule.save();
+      }
 
-      // Borrar inscripción
       await inscription.destroy();
-
-      // Devolver cupo
-      if (activity) {
-        activity.capacity += 1;
-        await activity.save();
-      }
-
-      res.json({
-        success: true,
-        message: "Inscripción eliminada y cupo restituido",
-      });
+      res.json({ success: true, message: "Inscription removed successfully" });
     } catch (err) {
       console.error(err);
       res.status(500).json({ success: false, message: "Database error" });
