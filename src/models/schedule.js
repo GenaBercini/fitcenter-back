@@ -87,10 +87,6 @@ const Schedule = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    instructor: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
   },
   {
     tableName: "schedules",

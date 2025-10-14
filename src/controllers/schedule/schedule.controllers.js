@@ -22,13 +22,12 @@ const scheduleController = {
 
   createSchedule: async (req, res) => {
     try {
-      const { day, startTime, endTime, capacity, instructor } = req.body;
+      const { day, startTime, endTime, capacity } = req.body;
       const newSchedule = await Schedule.create({
         day,
         startTime,
         endTime,
         capacity,
-        instructor,
       });
       res.status(201).send(newSchedule);
     } catch (err) {
@@ -41,8 +40,8 @@ const scheduleController = {
       const schedule = await Schedule.findByPk(req.params.id);
       if (!schedule) return res.status(404).send("Schedule not found");
 
-      const { day, startTime, endTime, capacity, instructor } = req.body;
-      await schedule.update({ day, startTime, endTime, capacity, instructor });
+      const { day, startTime, endTime, capacity } = req.body;
+      await schedule.update({ day, startTime, endTime, capacity });
       res.send(schedule);
     } catch (err) {
       res.status(500).send("Database error");
