@@ -16,6 +16,7 @@ import scheduleRoutes from "./src/routes/routes.schedule.js";
 import subsidiaryRoutes from "./src/routes/routes.subsidiary.js";
 import activityRoutes from "./src/routes/routes.activity.js";
 import inscriptionRoutes from "./src/routes/routes.inscription.js";
+import cartRouter from "./src/routes/routes.cart.js";
 
 dotenv.config();
 const swaggerFile = JSON.parse(
@@ -37,20 +38,23 @@ server.use(
 );
 
 // Rutas
+
 server.use("/categories", categoriesRoutes);
 server.use("/products", productsRoutes);
 server.use("/users", usersRoutes);
 server.use("/memberships", membershipsRoutes);
+server.use("/booking", bookingRoutes);
 server.use("/schedule", scheduleRoutes);
 server.use("/subsidiary", subsidiaryRoutes);
 server.use("/exercises", exercisesRoutes);
 server.use("/routines", routinesRoutes);
 server.use("/activities", activityRoutes);
 server.use("/inscription", inscriptionRoutes);
+server.use("/cart", cartRouter);
 
-// Documentacion con Swagger
-server.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
-
+ // Documentacion con Swagger
+ server.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+  
 // Manejador de errores
 server.use(errorHandler);
 
