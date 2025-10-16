@@ -1,9 +1,8 @@
-// controllers/inscription/inscription.controllers.js
-import Activity from "../../models/activities.js";
+import Activity from "../../models/Activities.js";
 import Schedule from "../../models/Schedule.js";
 import Inscription from "../../models/Inscription.js";
 import User from "../../models/User.js";
-import { Op } from "sequelize";
+// import { Op } from "sequelize";
 
 const inscriptionController = {
   // Create inscription (activity or schedule)
@@ -18,7 +17,7 @@ const inscriptionController = {
           .json({ success: false, message: "User not found" });
       }
 
-      // Handle activity inscription
+      // Handle activity inscripcion
       if (type === "activity") {
         const activity = await Activity.findByPk(activityId);
         if (!activity)
@@ -55,7 +54,7 @@ const inscriptionController = {
         });
       }
 
-      // Handle schedule inscription
+      // Handle schedule inscripcion
       if (type === "schedule") {
         const schedule = await Schedule.findByPk(scheduleId);
         if (!schedule)
@@ -79,7 +78,7 @@ const inscriptionController = {
             .status(400)
             .json({ success: false, message: "You already have 3 schedules" });
 
-        // User can't have another schedule the same day
+        // User no puede tener más de un turno el mismo día
         const sameDay = userSchedules.find(
           (insc) => insc.Schedule.day === schedule.day
         );
