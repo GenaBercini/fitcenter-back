@@ -17,6 +17,7 @@ import subsidiaryRoutes from "./src/routes/routes.subsidiary.js";
 import activityRoutes from "./src/routes/routes.activity.js";
 import inscriptionRoutes from "./src/routes/routes.inscription.js";
 import cartRouter from "./src/routes/routes.cart.js";
+import "./cron/resetTurnos.js";
 
 dotenv.config();
 const swaggerFile = JSON.parse(

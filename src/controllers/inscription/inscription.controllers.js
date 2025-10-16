@@ -104,6 +104,43 @@ const inscriptionController = {
           inscription,
         });
       }
+      // // Handle routine inscription
+      // if (type === "routine") {
+      //   const routine = await Activity.findByPk(activityId);
+      //   if (!routine)
+      //     return res
+      //       .status(404)
+      //       .json({ success: false, message: "Routine not found" });
+
+      //   if (routine.capacity <= 0)
+      //     return res
+      //       .status(400)
+      //       .json({ success: false, message: "No available spots" });
+
+      //   const alreadyRoutine = await Inscription.findOne({
+      //     where: { userId, type: "routine" },
+      //   });
+      //   if (alreadyRoutine)
+      //     return res.status(400).json({
+      //       success: false,
+      //       message: "You already have a routine",
+      //     });
+
+      //   const inscription = await Inscription.create({
+      //     userId,
+      //     activityId,
+      //     type: "routine",
+      //   });
+
+      //   routine.capacity -= 1;
+      //   await routine.save();
+
+      //   return res.json({
+      //     success: true,
+      //     message: `Routine enrolled successfully`,
+      //     inscription,
+      //   });
+      // }
 
       return res
         .status(400)

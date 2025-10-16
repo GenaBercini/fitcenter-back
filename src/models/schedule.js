@@ -25,6 +25,10 @@ const Schedule = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    maxCapacity: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   },
   {
     tableName: "schedules",
