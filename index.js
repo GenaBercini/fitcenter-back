@@ -36,9 +36,7 @@ server.use("/uploads", express.static("uploads"));
 
 server.use(express.json());
 server.set('port', 3000);
-server.use(cors({
-    origin: '*',
-  );
+
 // Middlewares
 server.use(express.json({ limit: "10mb" }));
 server.use(express.urlencoded({ limit: "10mb", extended: true }));
@@ -48,7 +46,7 @@ server.use(
     origin: process.env.CLIENT_URL,
     credentials: true,
   })
-
+)
 
 // Rutas
 
