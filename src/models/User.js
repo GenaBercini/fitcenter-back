@@ -12,7 +12,7 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    adress: {
+    address: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -39,7 +39,7 @@ const User = sequelize.define(
     image_url: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: "https://bit.ly/broken-link"
+      defaultValue: "https://bit.ly/broken-link",
     },
     banned: {
       type: DataTypes.BOOLEAN,

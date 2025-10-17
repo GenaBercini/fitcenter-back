@@ -147,14 +147,25 @@ const userController = {
           return next(new ErrorResponse("Error al actualizar imagen", 400));
       }
 
+      // await user.update({
+      //   first_name: first_name || user.first_name,
+      //   last_name: last_name || user.last_name,
+      //   address: address || user.address,
+      //   phone: phone || user.phone,
+      //   email: email || user.email,
+      //   role: role || user.role,
+      //   registration_number: registration_number || user.registration_number,
+      //   image_url: image ? result.url : user.image_url,
+      // });
+
       await user.update({
-        first_name: first_name || user.first_name,
-        last_name: last_name || user.last_name,
-        address: address || user.address,
-        phone: phone || user.phone,
-        email: email || user.email,
-        role: role || user.role,
-        registration_number: registration_number || user.registration_number,
+        first_name,
+        last_name,
+        address,
+        phone,
+        email,
+        role,
+        registration_number,
         image_url: image ? result.url : user.image_url,
       });
 
