@@ -1,5 +1,7 @@
 import Product from "../../models/Product.js";
 import Category from "../../models/Category.js";
+import fs from "fs";
+import path from "path";
 import { Op } from "sequelize";
 
 const productsController = {
@@ -66,10 +68,27 @@ const productsController = {
             next(error);
         }
     },
-    updateProduct: async (req, res, next) => {
+    updateProduct: async (req, res) => {
         try {
             const { id } = req.params;
-            const { name, price, description, stock, img, categoryId } = req.body;
+            const { name, price, description, stock, active, categoryId, lastImg } = req.body;
+            const { filename } = req.file;
+
+
+            if (lastImg != filename) {
+                const filePath = path.join("uploads", lastImg);
+
+                fs.access(filePath, fs.constants.F_OK, (err) => {
+                    if (!err) {
+                        fs.unlink(filePath, (err) => {
+                            if (err) console.error("Error al borrar imagen antigua:", err);
+                            else console.log("Imagen anterior eliminada:", lastImg);
+                        });
+                    }
+                });
+            }
+
+
             if (!id) {
                 return res.status(400).json({
                     success: false,
@@ -85,7 +104,7 @@ const productsController = {
                 });
             }
 
-            if (!name && !price && !stock && !img && !categoryId) {
+            if (!name && !price && !description && !stock && !active && !filename && !categoryId) {
                 return res.status(400).json({
                     success: false,
                     msg: "No hay información para actualizar"
@@ -104,11 +123,12 @@ const productsController = {
             // Podriamos validar si son string vacios osea no se cambian todos, solo los que realmente son distintos
             await product.update({
                 name,
+                img: filename,
                 price,
                 description,
                 stock,
-                img,
-                category: categoryFounded
+                active,
+                categoryId,
             });
 
             res.status(200).json({
@@ -123,9 +143,15 @@ const productsController = {
     },
     createProduct: async (req, res, next) => {
         try {
-            const { name, price, description, stock, img, categoryId } = req.body;
+            //console.log("req", req);
+            
+            console.log("req.body", req.body);
+            console.log("req.files", req.file);
 
-            if (!name || !price || !stock || !img || !categoryId) {
+            const { name, price, description, stock, active, categoryId } = req.body;
+            const { filename } = req.file;
+
+            if (!name || !price || !stock || !filename || !active || !categoryId || !description) {
                 return res.status(400).json({
                     success: false,
                     msg: "Faltan campos obligatorios"
@@ -143,11 +169,13 @@ const productsController = {
 
             const newProduct = await Product.create({
                 name,
+                img: filename,
                 price,
                 description,
                 stock,
-                img,
-                category: categoryFounded
+                active,
+                categoryId,
+                //category: categoryFounded
             });
 
             res.status(201).json({
@@ -160,7 +188,7 @@ const productsController = {
             next(error);
         }
     },
-    statusProduct: async (req, res, next) => {
+    statusProduct: async (req, res) => {
         try {
             const { id } = req.params;
             const { disabled } = req.body;
