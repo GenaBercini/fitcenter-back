@@ -51,9 +51,9 @@ server.use("/activities", activityRoutes);
 server.use("/inscription", inscriptionRoutes);
 server.use("/cart", cartRouter);
 
- // Documentacion con Swagger
- server.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
-  
+// Documentacion con Swagger
+server.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
+
 // Manejador de errores
 server.use(errorHandler);
 
