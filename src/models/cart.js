@@ -1,38 +1,35 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../config/database.js";
-import Product from "./Product.js";
-import User from "./User.js"; 
 
-const CartItem = sequelize.define("CartItem", {
+const Cart = sequelize.define("Cart", {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-        model: User,
-        key: "id",
-    }
+  total: {
+    type: DataTypes.FLOAT,
+    defaultValue: 0,
   },
-  productId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references:{
-        model:Product,
-        key: "id",
-    },
+  status: {
+    type: DataTypes.ENUM("Open", "Pending", "Cancelled", "Paid"),
+    defaultValue: "Open",
   },
-  quantity: {
-    type: DataTypes.INTEGER,
-    defaultValue: 1,
+  paymentDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
   },
+  paymentIntentId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  paymentMethod: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  createdAt: DataTypes.DATE,
+  updatedAt: DataTypes.DATE,
 });
 
-// Asociaciones
-CartItem.belongsTo(Product, { foreignKey: "productId" });
-CartItem.belongsTo(User, { foreignKey: "userId" });
 
-export default CartItem;
+export default Cart;

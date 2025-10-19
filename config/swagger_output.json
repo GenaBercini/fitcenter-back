@@ -1,8 +1,8 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "API de Mascotas",
-    "description": "Documentación de la API para la gestión de mascotas",
+    "title": "API de FitCenter",
+    "description": "Documentación de la API para la gestión de FitCenter",
     "version": "1.0.0"
   },
   "host": "localhost:3000",
@@ -11,6 +11,26 @@
     "http"
   ],
   "paths": {
+    "/webhook/stripe": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "stripe-signature",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
     "/categories/": {
       "get": {
         "description": "",
@@ -422,6 +442,30 @@
         }
       }
     },
+    "/users/payMembership/{userId}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/users/auth/google/save": {
       "post": {
         "description": "",
@@ -659,7 +703,7 @@
         }
       }
     },
-    "/booking/": {
+    "/schedule/": {
       "get": {
         "description": "",
         "responses": {
@@ -680,13 +724,16 @@
             "schema": {
               "type": "object",
               "properties": {
-                "activity": {
+                "day": {
                   "example": "any"
                 },
-                "entry": {
+                "startTime": {
                   "example": "any"
                 },
-                "exit": {
+                "endTime": {
+                  "example": "any"
+                },
+                "capacity": {
                   "example": "any"
                 }
               }
@@ -703,7 +750,7 @@
         }
       }
     },
-    "/booking/{id}": {
+    "/schedule/{id}": {
       "get": {
         "description": "",
         "parameters": [
@@ -741,13 +788,16 @@
             "schema": {
               "type": "object",
               "properties": {
-                "activity": {
+                "day": {
                   "example": "any"
                 },
-                "entry": {
+                "startTime": {
                   "example": "any"
                 },
-                "exit": {
+                "endTime": {
+                  "example": "any"
+                },
+                "capacity": {
                   "example": "any"
                 }
               }
@@ -1104,6 +1154,367 @@
           },
           "404": {
             "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/activities/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "example": "any"
+                },
+                "startTime": {
+                  "example": "any"
+                },
+                "endTime": {
+                  "example": "any"
+                },
+                "capacity": {
+                  "example": "any"
+                },
+                "instructor": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/activities/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "example": "any"
+                },
+                "startTime": {
+                  "example": "any"
+                },
+                "endTime": {
+                  "example": "any"
+                },
+                "capacity": {
+                  "example": "any"
+                },
+                "instructor": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/inscription/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "example": "any"
+                },
+                "activityId": {
+                  "example": "any"
+                },
+                "scheduleId": {
+                  "example": "any"
+                },
+                "type": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/inscription/{userId}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/inscription/{id}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/cart/all/{userId}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cart/{userId}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/cart/add/{idCart}": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCart",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "productId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/cart/remove/{idCart}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCart",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "productId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/cart/checkout/{userId}": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cartId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }

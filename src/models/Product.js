@@ -28,23 +28,7 @@ const Product = sequelize.define(
       defaultValue: false,
     },
   },
-  {}
 );
 
-Product.associate = (models) => {
-  Product.belongsTo(models.Category, {
-    foreignKey: "categoryId",
-    as: "category",
-  });
-};
-
-Product.associate = (models) => {
-  Product.belongsToMany(models.OrderPurchase, {
-    through: models.OrderProduct,
-    foreignKey: "orderPurchaseId",
-    otherKey: "productId",
-    as: "product",
-  });
-};
 
 export default Product;

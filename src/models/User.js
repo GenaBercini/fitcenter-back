@@ -12,7 +12,7 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    adress: {
+    address: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -39,11 +39,25 @@ const User = sequelize.define(
     image_url: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: "https://bit.ly/broken-link"
+      defaultValue: "https://bit.ly/broken-link",
     },
     banned: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+    membershipType: {
+      type: DataTypes.ENUM("Guest", "Premium", "Pending"),
+      allowNull: false,
+      defaultValue: "Guest",
+    },
+    membershipStartDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    membershipEndDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
   },
   {
