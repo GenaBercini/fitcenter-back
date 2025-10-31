@@ -51,6 +51,20 @@ const User = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    membershipType: {
+      type: DataTypes.ENUM("Guest", "Premium", "Pending"),
+      allowNull: false,
+      defaultValue: "Guest",
+    },
+    membershipStartDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    membershipEndDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: "users",

@@ -1,9 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
+import User from "../src/models/User.js";
 
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 export async function createUserImage(supabase, uid, imageBase64) {
   try {
     if (!imageBase64) {
@@ -67,3 +68,31 @@ export async function updateUserImage(supabase, uid, imageBase64) {
     return { success: false, error: err.message };
   }
 }
+
+export const authenticateUser = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({ message: "Token no proporcionado" });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data, error } = await supabase.auth.getUser(token);
+
+    if (error || !data?.user) {
+      return res.status(401).json({ message: "Token inválido o expirado" });
+    }
+
+    const user = await User.findOne({ where: { uid: data.user.id } });
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+    req.user = user;
+    next();
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error al autenticar", error: err.message });
+  }
+};

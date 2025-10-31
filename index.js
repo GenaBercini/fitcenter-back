@@ -1,11 +1,12 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
-import sequelize from "./config/database.js";
+import sequelize from "./src/models/index.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import swaggerUi from 'swagger-ui-express';
-import fs from 'fs';
+import swaggerUi from "swagger-ui-express";
+import fs from "fs";
+import "./src/utils/membershipExpiration.js"
 import models from "./src/models/index.js";
 import errorHandler from "./src/utils/errorHandler.js";
 import categoriesRoutes from "./src/routes/routes.categories.js";
@@ -24,6 +25,7 @@ import activityRoutes from "./src/routes/routes.activity.js";
 import inscriptionRoutes from "./src/routes/routes.inscription.js";
 import cartRouter from "./src/routes/routes.cart.js";
 import "./cron/resetTurnos.js";
+import stripeController from "./src/controllers/stripe/stripe.controllers.js"
 
 dotenv.config();
 const swaggerFile = JSON.parse(
@@ -38,6 +40,7 @@ server.use(express.json());
 server.set('port', 3000);
 
 // Middlewares
+server.post('/webhook/stripe', express.raw({ type: 'application/json' }), stripeController.stripeWebhook);
 server.use(express.json({ limit: "10mb" }));
 server.use(express.urlencoded({ limit: "10mb", extended: true }));
 server.use(cookieParser());
@@ -46,9 +49,7 @@ server.use(
     origin: process.env.CLIENT_URL,
     credentials: true,
   })
-)
-
-// Rutas
+);
 
 server.use("/categories", categoriesRoutes);
 server.use("/products", productsRoutes);

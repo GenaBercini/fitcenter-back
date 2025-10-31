@@ -5,8 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "seed": "node src/seeders/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -L",
+    "swagger": "node config/swagger.js",
     "dev": "nodemon -L index.js"
   },
   "repository": {
@@ -31,7 +33,14 @@
     "node-cron": "^4.2.1",
     "nodemon": "^3.1.10",
     "sequelize": "^6.37.7",
+    "sequelize-cli": "^6.6.3",
     "sqlite3": "^5.1.7",
+    "stripe": "^19.1.0"
+  },
+  "devDependencies": {
+    "install": "^0.13.0",
+    "npm": "^11.5.2",
+    "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.1"
   }
 }
