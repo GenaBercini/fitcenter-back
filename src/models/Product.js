@@ -1,8 +1,8 @@
-import { DataTypes } from "sequelize";
-import sequelize from "../../config/database.js";
+import { DataTypes } from 'sequelize';
+import sequelize from '../../config/database.js';
 
 const Product = sequelize.define(
-  "Product",
+  'Product',
   {
     name: {
       type: DataTypes.STRING,
@@ -27,8 +27,18 @@ const Product = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+
+    categoryId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Categories",
+        key: "id",
+      },
+    },
   },
 );
+
 
 
 export default Product;

@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -L",
     "swagger": "node config/swagger.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon -L index.js"
   },
   "repository": {
     "type": "git",
@@ -22,12 +22,13 @@
   },
   "homepage": "https://github.com/KevinEgidi/fitcenter-back#readme",
   "dependencies": {
-    "@supabase/supabase-js": "^2.56.1",
+    "@supabase/supabase-js": "^2.75.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
+    "multer": "^2.0.2",
     "mysql2": "^3.14.3",
     "node-cron": "^4.2.1",
     "nodemon": "^3.1.10",
