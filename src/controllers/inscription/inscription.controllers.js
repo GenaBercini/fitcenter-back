@@ -1,9 +1,10 @@
+
 // controllers/inscription/inscription.controllers.js
 import Activity from "../../models/Activity.js";
 import Schedule from "../../models/Schedule.js";
 import Inscription from "../../models/Inscription.js";
 import User from "../../models/User.js";
-import { Op } from "sequelize";
+// import { Op } from "sequelize";
 
 const inscriptionController = {
   // Create inscription (activity or schedule)
@@ -18,7 +19,7 @@ const inscriptionController = {
           .json({ success: false, message: "User not found" });
       }
 
-      // Handle activity inscription
+      // Handle activity inscripcion
       if (type === "activity") {
         const activity = await Activity.findByPk(activityId);
         if (!activity)
@@ -55,7 +56,7 @@ const inscriptionController = {
         });
       }
 
-      // Handle schedule inscription
+      // Handle schedule inscripcion
       if (type === "schedule") {
         const schedule = await Schedule.findByPk(scheduleId);
         if (!schedule)
@@ -79,7 +80,7 @@ const inscriptionController = {
             .status(400)
             .json({ success: false, message: "You already have 3 schedules" });
 
-        // User can't have another schedule the same day
+        // User no puede tener más de un turno el mismo día
         const sameDay = userSchedules.find(
           (insc) => insc.Schedule.day === schedule.day
         );
@@ -104,6 +105,43 @@ const inscriptionController = {
           inscription,
         });
       }
+      // // Handle routine inscription
+      // if (type === "routine") {
+      //   const routine = await Activity.findByPk(activityId);
+      //   if (!routine)
+      //     return res
+      //       .status(404)
+      //       .json({ success: false, message: "Routine not found" });
+
+      //   if (routine.capacity <= 0)
+      //     return res
+      //       .status(400)
+      //       .json({ success: false, message: "No available spots" });
+
+      //   const alreadyRoutine = await Inscription.findOne({
+      //     where: { userId, type: "routine" },
+      //   });
+      //   if (alreadyRoutine)
+      //     return res.status(400).json({
+      //       success: false,
+      //       message: "You already have a routine",
+      //     });
+
+      //   const inscription = await Inscription.create({
+      //     userId,
+      //     activityId,
+      //     type: "routine",
+      //   });
+
+      //   routine.capacity -= 1;
+      //   await routine.save();
+
+      //   return res.json({
+      //     success: true,
+      //     message: `Routine enrolled successfully`,
+      //     inscription,
+      //   });
+      // }
 
       return res
         .status(400)
@@ -122,7 +160,8 @@ const inscriptionController = {
         where: { userId },
         include: [Activity, Schedule],
       });
-      res.json(inscriptions);
+      // res.json(inscriptions);
+      res.json({ data: inscriptions });
     } catch (err) {
       console.error(err);
       res.status(500).json({ success: false, message: "Database error" });
