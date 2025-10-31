@@ -15,6 +15,7 @@ const userController = {
         password,
         address,
         phone,
+        matricula,
         email,
         role,
         registration_number,
@@ -27,12 +28,6 @@ const userController = {
         );
       }
 
-      if (role === "professor" && !registration_number) {
-        return next(
-          new ErrorResponse("Un profesor debe tener un número de registro", 400)
-        );
-      }
-
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) return next(new ErrorResponse(error.message, 400));
 
@@ -40,7 +35,7 @@ const userController = {
         httpOnly: true,
         secure: false,
         sameSite: "lax",
-        maxAge: 1000 * 60 * 60 * 24, // 1 día
+        maxAge: 1000 * 60 * 60 * 24,
       });
 
       let imageDefinitive = image;
@@ -61,7 +56,9 @@ const userController = {
         last_name,
         address,
         phone,
+        matricula,
         email,
+
         uid: data.user.id,
         role,
         registration_number: role === "professor" ? registration_number : null,
@@ -114,6 +111,7 @@ const userController = {
         last_name,
         address,
         phone,
+        matricula,
         email,
         role,
         registration_number,
@@ -127,6 +125,7 @@ const userController = {
         !last_name &&
         !address &&
         !phone &&
+        !matricula &&
         !email &&
         !role &&
         !registration_number &&
@@ -152,6 +151,7 @@ const userController = {
         last_name: last_name || user.last_name,
         address: address || user.address,
         phone: phone || user.phone,
+        matricula: matricula || user.matricula,
         email: email || user.email,
         role: role || user.role,
         registration_number: registration_number || user.registration_number,

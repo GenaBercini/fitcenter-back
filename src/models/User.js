@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../config/database.js";
+import Activity from "./Activity.js";
 
 const User = sequelize.define(
   "User",
@@ -12,11 +13,15 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    adress: {
+    address: {
       type: DataTypes.STRING,
       allowNull: true,
     },
     phone: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    matricula: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -26,7 +31,7 @@ const User = sequelize.define(
     },
     uid: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     role: {
       type: DataTypes.ENUM("professor", "instructor", "admin", "client"),
@@ -39,8 +44,9 @@ const User = sequelize.define(
     image_url: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: "https://bit.ly/broken-link"
+      defaultValue: "https://bit.ly/broken-link",
     },
+
     banned: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
@@ -51,5 +57,5 @@ const User = sequelize.define(
     timestamps: true,
   }
 );
-
+User.hasMany(Activity, { as: "activities", foreignKey: "instructorId" });
 export default User;

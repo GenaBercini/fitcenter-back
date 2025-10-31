@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../config/database.js";
-import Activity from "./Activities.js";
+import Activity from "./Activity.js";
 import Schedule from "./Schedule.js";
 import User from "./User.js";
 
@@ -23,7 +23,6 @@ const Inscription = sequelize.define(
   }
 );
 
-// Associations
 User.hasMany(Inscription, { foreignKey: "userId" });
 Inscription.belongsTo(User, { foreignKey: "userId" });
 

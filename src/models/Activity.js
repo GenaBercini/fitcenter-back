@@ -15,7 +15,7 @@ const Activity = sequelize.define(
     },
     description: {
       type: DataTypes.TEXT,
-      allowNull: true, // en la DB puede ser null, así que la dejamos opcional
+      allowNull: true,
     },
     startTime: {
       type: DataTypes.TIME,
@@ -36,7 +36,7 @@ const Activity = sequelize.define(
   },
   {
     tableName: "activities",
-    timestamps: true, // createdAt y updatedAt automáticos
+    timestamps: true,
   }
 );
 

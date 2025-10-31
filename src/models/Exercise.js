@@ -1,30 +1,22 @@
-import {DataTypes} from 'sequelize';
-import sequelize from '../../config/database.js';
-
+import { DataTypes } from "sequelize";
+import sequelize from "../../config/database.js";
+import Routine from "./Routine.js";
 const Exercise = sequelize.define(
-    'Exercise',
-    {  
-        name:{
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        typeEx:{
-            type:DataTypes.STRING,
-            allowNull:false
-        },
+  "Exercise",
+  {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
-    {
+    typeEx: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
+  },
+  {}
 );
 
-
-Exercise.associate = (models) =>{
-    Exercise.belongsToMany(models.Routine,{
-        through: models.RoutineExe,
-        foreignKey:'exerciseId',
-        other: 'routineId',
-        as: 'exercise'
-    })
-}
+Exercise.belongsToMany(Routine, { through: "RoutineExercises" });
+Routine.belongsToMany(Exercise, { through: "RoutineExercises" });
 
 export default Exercise;
