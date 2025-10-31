@@ -1,7 +1,6 @@
 import e from "express";
 import Exercise from "../../models/Exercise.js";
 import Routine from "../../models/Routine.js";
-import RoutineExe from "../../models/RoutineExe.js";
 
 const routinesController = {
   getAllRoutines: async (req, res, next) => {

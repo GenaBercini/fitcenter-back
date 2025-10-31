@@ -1,4 +1,4 @@
-import Professor from "../../models/Professor.js";
+import Professor from "../../models/User.js";
 
 const professorController = {
   createProfessor: async (req, res) => {

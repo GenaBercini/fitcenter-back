@@ -38,9 +38,7 @@ server.use("/uploads", express.static("uploads"));
 
 server.use(express.json());
 server.set('port', 3000);
-server.use(cors({
-    origin: '*',
-  );
+
 // Middlewares
 server.post('/webhook/stripe', express.raw({ type: 'application/json' }), stripeController.stripeWebhook);
 server.use(express.json({ limit: "10mb" }));

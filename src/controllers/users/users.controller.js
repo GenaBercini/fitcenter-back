@@ -18,6 +18,7 @@ const userController = {
         password,
         address,
         phone,
+        matricula,
         email,
         role,
         registration_number,
@@ -29,7 +30,6 @@ const userController = {
           new ErrorResponse("Email, rol y contraseña son obligatorios", 400)
         );
       }
-
       if (role && !User.rawAttributes.role.values.includes(role)) {
         return next(
           new ErrorResponse(
@@ -52,7 +52,6 @@ const userController = {
           )
         );
       }
-
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) return next(new ErrorResponse(error.message, 400));
 
@@ -60,7 +59,7 @@ const userController = {
         httpOnly: true,
         secure: false,
         sameSite: "lax",
-        maxAge: 1000 * 60 * 60 * 24, // 1 día
+        maxAge: 1000 * 60 * 60 * 24,
       });
 
       let imageDefinitive = image;
@@ -81,7 +80,9 @@ const userController = {
         last_name,
         address,
         phone,
+        matricula,
         email,
+
         uid: data.user.id,
         role,
         registration_number:
@@ -138,6 +139,7 @@ const userController = {
         last_name,
         address,
         phone,
+        matricula,
         email,
         role,
         registration_number,
@@ -151,6 +153,7 @@ const userController = {
         !last_name &&
         !address &&
         !phone &&
+        !matricula &&
         !email &&
         !role &&
         !registration_number &&
@@ -187,6 +190,7 @@ const userController = {
         last_name: last_name || user.last_name,
         address: address || user.address,
         phone: phone || user.phone,
+        matricula: matricula || user.matricula,
         email: email || user.email,
         role: role || user.role,
         registration_number: registration_number || user.registration_number,
