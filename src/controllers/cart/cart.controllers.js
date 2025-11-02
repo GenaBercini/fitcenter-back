@@ -123,9 +123,12 @@ const cartController = {
   removeFromCart: async (req, res, next) => {
     try {
       const { idCart } = req.params;
-      const { productId } = req.body;
+      const { productId, removeAll } = req.body;
 
-      const cart = await Cart.findByPk(idCart);
+      // const cart = await Cart.findByPk(idCart);
+      const cart = await Cart.findByPk(idCart, {
+        include: { model: CartItem, as: "items" },
+      });
 
       if (cart.status !== "Open") {
         return next(new ErrorResponse("No hay carrito activo", 404));
@@ -147,13 +150,25 @@ const cartController = {
         );
       }
 
-      if (item.quantity > 1) {
-        item.quantity -= 1;
-        item.subtotal = product.price * item.quantity;
-        await item.save();
-      } else {
+      if (removeAll || item.quantity <= 1) {
         await item.destroy();
+      } else {
+        if (item.quantity > 1) {
+          item.quantity -= 1;
+          item.subtotal = product.price * item.quantity;
+          await item.save();
+        } else {
+          await item.destroy();
+        }
       }
+
+      // if (item.quantity > 1) {
+      //   item.quantity -= 1;
+      //   item.subtotal = product.price * item.quantity;
+      //   await item.save();
+      // } else {
+      //   await item.destroy();
+      // }
 
       await calculateCartTotal(cart.id);
       const updated = await Cart.findByPk(cart.id, {
@@ -188,8 +203,7 @@ const cartController = {
         ],
       });
 
-      if (!cart)
-        return next(new ErrorResponse("Carrito no encontrado", 404));
+      if (!cart) return next(new ErrorResponse("Carrito no encontrado", 404));
 
       if (cart.items.length === 0)
         return next(new ErrorResponse("El carrito está vacío", 400));
@@ -213,7 +227,7 @@ const cartController = {
       cart.status = "Pending";
       await cart.save();
 
-       res.json({
+      res.json({
         success: true,
         message: "Sesión de checkout creada",
         data: { url: session.url },

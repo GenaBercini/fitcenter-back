@@ -1,7 +1,7 @@
 import stripe from "../../../config/stripe.js";
 import Cart from "../../models/Cart.js";
 import User from "../../models/User.js";
-import ErrorResponse from "../../utils/errorResponse.js";
+import ErrorResponse from "../../utils/errorConstructor.js";
 
 
 const stripeController = {
