@@ -1,30 +1,22 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../config/database.js";
-
-// ESTE ARCHIVO ASI NO EXISTE HAY Q BORRARLO
+import Routine from "./Routine.js";
 const Exercise = sequelize.define(
-  "Category",
+  "Exercise",
   {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    img: {
+    typeEx: {
       type: DataTypes.STRING,
-    },
-    disabled: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
+      allowNull: false,
     },
   },
   {}
 );
 
-Exercise.associate = (models) => {
-  Exercise.hasMany(models.Product, {
-    foreignKey: "categoryId",
-    as: "products",
-  });
-};
+Exercise.belongsToMany(Routine, { through: "RoutineExercises" });
+Routine.belongsToMany(Exercise, { through: "RoutineExercises" });
 
 export default Exercise;

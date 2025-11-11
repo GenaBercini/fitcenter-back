@@ -5,9 +5,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "seed": "node src/seeders/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -L",
-    "dev": "nodemon src/index.js"
+    "swagger": "node config/swagger.js",
+    "dev": "nodemon -L index.js"
   },
   "repository": {
     "type": "git",
@@ -20,18 +22,20 @@
   },
   "homepage": "https://github.com/KevinEgidi/fitcenter-back#readme",
   "dependencies": {
-    "@supabase/supabase-js": "^2.56.1",
+    "@supabase/supabase-js": "^2.75.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
+    "multer": "^2.0.2",
     "mysql2": "^3.14.3",
     "node-cron": "^4.2.1",
     "nodemon": "^3.1.10",
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.3",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "stripe": "^19.1.0"
   },
   "devDependencies": {
     "install": "^0.13.0",

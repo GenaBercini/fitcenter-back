@@ -1,4 +1,6 @@
-import Activity from "../../models/Activities.js";
+
+// controllers/inscription/inscription.controllers.js
+import Activity from "../../models/Activity.js";
 import Schedule from "../../models/Schedule.js";
 import Inscription from "../../models/Inscription.js";
 import User from "../../models/User.js";

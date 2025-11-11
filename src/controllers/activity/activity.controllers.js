@@ -1,4 +1,4 @@
-import Activity from "../../models/Activities.js";
+import Activity from "../../models/Activity.js";
 
 const activityController = {
   getAllActivities: async (req, res) => {

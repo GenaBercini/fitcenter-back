@@ -1,8 +1,8 @@
-import { DataTypes } from "sequelize";
-import sequelize from "../../config/database.js";
+import { DataTypes } from 'sequelize';
+import sequelize from '../../config/database.js';
 
 const Product = sequelize.define(
-  "Product",
+  'Product',
   {
     name: {
       type: DataTypes.STRING,
@@ -27,24 +27,18 @@ const Product = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+
+    categoryId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Categories",
+        key: "id",
+      },
+    },
   },
-  {}
 );
 
-Product.associate = (models) => {
-  Product.belongsTo(models.Category, {
-    foreignKey: "categoryId",
-    as: "category",
-  });
-};
 
-Product.associate = (models) => {
-  Product.belongsToMany(models.OrderPurchase, {
-    through: models.OrderProduct,
-    foreignKey: "orderPurchaseId",
-    otherKey: "productId",
-    as: "product",
-  });
-};
 
 export default Product;

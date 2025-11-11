@@ -1,4 +1,4 @@
-import Professor from "../../models/Professor.js";
+import Professor from "../../models/User.js";
 
 const professorController = {
   createProfessor: async (req, res) => {
@@ -29,8 +29,10 @@ const professorController = {
 
   getAllProfessors: async (req, res) => {
     try {
-      const professors = await Professors.findAll();
+      const professors = await Professor.findAll();
       res.json(professors);
+      console.log(professors);
+      
     } catch (error) {
       res.status(500).json({ message: "Error fetching professors", error });
     }

@@ -3,8 +3,11 @@ import {
   supabase,
   updateUserImage,
   createUserImage,
-} from "../../utils/supabase.config.js";
+} from "../../../config/supabase.config.js";
+import stripe from "../../../config/stripe.js";
 import ErrorResponse from "../../utils/errorConstructor.js";
+
+const redirectUrl = process.env.FRONTEND_URL || "http://localhost:5173/";
 
 const userController = {
   createUser: async (req, res, next) => {
@@ -15,6 +18,7 @@ const userController = {
         password,
         address,
         phone,
+        matricula,
         email,
         role,
         registration_number,
@@ -26,13 +30,28 @@ const userController = {
           new ErrorResponse("Email, rol y contraseña son obligatorios", 400)
         );
       }
-
-      if (role === "professor" && !registration_number) {
+      if (role && !User.rawAttributes.role.values.includes(role)) {
         return next(
-          new ErrorResponse("Un profesor debe tener un número de registro", 400)
+          new ErrorResponse(
+            `Rol inválido. Roles válidos: ${User.rawAttributes.role.values.join(
+              ", "
+            )}`,
+            400
+          )
         );
       }
 
+      if (
+        (role === "professor" || role === "instructor") &&
+        !registration_number
+      ) {
+        return next(
+          new ErrorResponse(
+            "Los profesores e instructores deben tener un número de registro",
+            400
+          )
+        );
+      }
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) return next(new ErrorResponse(error.message, 400));
 
@@ -40,7 +59,7 @@ const userController = {
         httpOnly: true,
         secure: false,
         sameSite: "lax",
-        maxAge: 1000 * 60 * 60 * 24, // 1 día
+        maxAge: 1000 * 60 * 60 * 24,
       });
 
       let imageDefinitive = image;
@@ -61,16 +80,22 @@ const userController = {
         last_name,
         address,
         phone,
+        matricula,
         email,
+
         uid: data.user.id,
         role,
-        registration_number: role === "professor" ? registration_number : null,
+        registration_number:
+          role === "professor" || role === "instructor"
+            ? registration_number
+            : null,
         image_url: imageDefinitive,
       });
 
       res.status(201).json({
         success: true,
         msg: "User created successfully",
+        token: data.session?.access_token || "",
         data: newUser,
       });
     } catch (error) {
@@ -114,6 +139,7 @@ const userController = {
         last_name,
         address,
         phone,
+        matricula,
         email,
         role,
         registration_number,
@@ -127,6 +153,7 @@ const userController = {
         !last_name &&
         !address &&
         !phone &&
+        !matricula &&
         !email &&
         !role &&
         !registration_number &&
@@ -140,6 +167,17 @@ const userController = {
       const user = await User.findByPk(id);
       if (!user) return next(new ErrorResponse("Usuario no encontrado", 404));
 
+      if (
+        role === "professor" ||
+        (role === "instructor" && !registration_number)
+      ) {
+        return next(
+          new ErrorResponse(
+            "Los profesores e instructores deben tener un número de registro",
+            400
+          )
+        );
+      }
       let result;
       if (image) {
         result = await updateUserImage(supabase, user.uid, image);
@@ -172,7 +210,8 @@ const userController = {
       res.status(201).json({
         success: true,
         message: "Usuario actualizado correctamente",
-        data: user,
+        token: data.session?.access_token || "",
+        data: updatedUser,
       });
     } catch (error) {
       next(error);
@@ -224,6 +263,7 @@ const userController = {
       res.json({
         success: true,
         message: "Usuario logueado correctamente",
+        token: data.session?.access_token || "",
         data: userDB,
       });
     } catch (error) {
@@ -244,6 +284,7 @@ const userController = {
       res.json({
         success: true,
         message: "Sesion encontrada",
+        token: token,
         data: userDB,
       });
     } catch (error) {
@@ -263,7 +304,7 @@ const userController = {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: "http://localhost:5173/" },
+        options: { redirectTo: redirectUrl },
       });
 
       if (error) return next(new ErrorResponse(error.message, 400));
@@ -304,7 +345,43 @@ const userController = {
       res.json({
         success: true,
         message: "Usuario de Google guardado",
+        token: token,
         data: userDB,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+  createCheckoutMembership: async (req, res, next) => {
+    const { userId } = req.params;
+
+    try {
+      const user = await User.findByPk(userId);
+      if (!user) return next(new ErrorResponse("Usuario no encontrado", 404));
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "payment",
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: { name: "Membresía PRO (1 mes)" },
+              unit_amount: 10 * 100,
+            },
+            quantity: 1,
+          },
+        ],
+        metadata: { userId, membershipPayment: "true" },
+        success_url: `${process.env.CLIENT_URL}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.CLIENT_URL}/membership/cancel`,
+      });
+      user.membershipType = "Pending";
+      await user.save();
+      res.json({
+        success: true,
+        message: "Sesión de checkout creada",
+        data: { url: session.url },
       });
     } catch (error) {
       next(error);

@@ -1,10 +1,13 @@
 import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
-import sequelize from "./config/database.js";
+import sequelize from "./src/models/index.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
 import fs from "fs";
+import "./src/utils/membershipExpiration.js"
+import models from "./src/models/index.js";
 import errorHandler from "./src/utils/errorHandler.js";
 import categoriesRoutes from "./src/routes/routes.categories.js";
 import productsRoutes from "./src/routes/routes.products.js";
@@ -18,6 +21,7 @@ import activityRoutes from "./src/routes/routes.activity.js";
 import inscriptionRoutes from "./src/routes/routes.inscription.js";
 import cartRouter from "./src/routes/routes.cart.js";
 import "./cron/resetTurnos.js";
+import stripeController from "./src/controllers/stripe/stripe.controllers.js"
 
 dotenv.config();
 const swaggerFile = JSON.parse(
@@ -25,9 +29,14 @@ const swaggerFile = JSON.parse(
 );
 
 const server = express();
-server.set("port", 3000);
+
+server.use("/uploads", express.static("uploads"));
+
+server.use(express.json());
+server.set('port', 3000);
 
 // Middlewares
+server.post('/webhook/stripe', express.raw({ type: 'application/json' }), stripeController.stripeWebhook);
 server.use(express.json({ limit: "10mb" }));
 server.use(express.urlencoded({ limit: "10mb", extended: true }));
 server.use(cookieParser());
@@ -37,8 +46,6 @@ server.use(
     credentials: true,
   })
 );
-
-// Rutas
 
 server.use("/categories", categoriesRoutes);
 server.use("/products", productsRoutes);
@@ -58,19 +65,18 @@ server.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 // Manejador de errores
 server.use(errorHandler);
 
-// Sincronizar modelos y arrancar servidor
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log("✅ Conectado correctamente a la base de datos");
+    console.log('✅ Conectado correctamente a la base de datos');
 
     await sequelize.sync({ alter: true });
-    console.log("🛠️ Modelos sincronizados");
+    console.log('🛠️ Modelos sincronizados');
 
     server.listen(server.get("port"), () => {
       console.log("Servidor corriendo en el puerto", server.get("port"));
     });
   } catch (error) {
-    console.error("❌ Error conectando a la base de datos:", error);
+    console.error('❌ Error conectando a la base de datos:', error);
   }
 })();
