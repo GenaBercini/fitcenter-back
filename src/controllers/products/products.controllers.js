@@ -9,7 +9,6 @@ const productsController = {
         try {
             const allProducts = await Product.findAll({
                 where: {
-                    disabled: false,
                     stock: { [Op.gte]: 1 } // Stock mayor o igual a 1
                 },
                 include: [{
@@ -72,10 +71,10 @@ const productsController = {
         try {
             const { id } = req.params;
             const { name, price, description, stock, active, categoryId, lastImg } = req.body;
-            const { filename } = req.file;
+            const filename = req.file ? req.file.filename : lastImg;
 
 
-            if (lastImg != filename) {
+            if (filename != null && lastImg != filename) {
                 const filePath = path.join("uploads", lastImg);
 
                 fs.access(filePath, fs.constants.F_OK, (err) => {
@@ -127,7 +126,7 @@ const productsController = {
                 price,
                 description,
                 stock,
-                active,
+                disabled: active,
                 categoryId,
             });
 
@@ -143,7 +142,6 @@ const productsController = {
     },
     createProduct: async (req, res, next) => {
         try {
-            //console.log("req", req);
             
             console.log("req.body", req.body);
             console.log("req.files", req.file);

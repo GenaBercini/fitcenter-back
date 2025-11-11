@@ -1,12 +1,12 @@
 import Category from "../../models/Category.js";
+import fs from "fs";
+import path from "path";
 
 const categoriesController = {
     getAllCategories: async (req, res, next) => {
         try {
             const allCategories = await Category.findAll({
-                where: {
-                    disabled: false
-                }
+
             });
 
             if (!allCategories) {
@@ -61,14 +61,20 @@ const categoriesController = {
     },
     createCategory: async (req, res, next) => {
         try {
-            const { name, img } = req.body;
-            if (!name || !img) {
+
+            console.log("req.body", req.body);
+            console.log("req.files", req.file);
+
+            const { name, active } = req.body;
+            const { filename } = req.file;
+
+            if (!name || !active || !filename) {
                 return res.status(400).json({
                     success: false,
                     msg: "Faltan campos obligatorios"
                 });
             }
-            const newCategory = await Category.create({ name, img });
+            const newCategory = await Category.create({ name, img: filename, active });
 
             res.status(200).json({
                 success: true,
@@ -84,7 +90,24 @@ const categoriesController = {
     updateCategory: async (req, res, next) => {
         try {
             const { id } = req.params;
-            const { name, img } = req.body;
+            const { name, active, lastImg } = req.body;
+            const filename = req.file ? req.file.filename : lastImg;
+
+            console.log(req.body);
+
+
+            if (filename != null && lastImg != filename) {
+                const filePath = path.join("uploads", lastImg);
+
+                fs.access(filePath, fs.constants.F_OK, (err) => {
+                    if (!err) {
+                        fs.unlink(filePath, (err) => {
+                            if (err) console.error("Error al borrar imagen antigua:", err);
+                            else console.log("Imagen anterior eliminada:", lastImg);
+                        });
+                    }
+                });
+            }
             
             if (!id) {
                 return res.status(400).json({
@@ -93,7 +116,7 @@ const categoriesController = {
                 });
             }
 
-            if (!name && !img) {
+            if (!name && !filename && !active) {
                 return res.status(400).json({
                     success: false,
                     msg: "No hay información para actualizar"
@@ -108,7 +131,7 @@ const categoriesController = {
                 });
             }
 
-            await category.update({ name, img });
+            await category.update({ name, img: filename, disabled:active });
 
             res.status(200).json({
                 success: true,
