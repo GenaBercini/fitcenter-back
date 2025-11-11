@@ -24,9 +24,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
           }
         }
       }
@@ -200,7 +197,7 @@
                 "stock": {
                   "example": "any"
                 },
-                "img": {
+                "active": {
                   "example": "any"
                 },
                 "categoryId": {
@@ -270,10 +267,13 @@
                 "stock": {
                   "example": "any"
                 },
-                "img": {
+                "active": {
                   "example": "any"
                 },
                 "categoryId": {
+                  "example": "any"
+                },
+                "lastImg": {
                   "example": "any"
                 }
               }
@@ -360,6 +360,9 @@
                   "example": "any"
                 },
                 "phone": {
+                  "example": "any"
+                },
+                "matricula": {
                   "example": "any"
                 },
                 "email": {
@@ -456,12 +459,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
@@ -538,6 +535,9 @@
                   "example": "any"
                 },
                 "phone": {
+                  "example": "any"
+                },
+                "matricula": {
                   "example": "any"
                 },
                 "email": {
@@ -1471,6 +1471,9 @@
               "properties": {
                 "productId": {
                   "example": "any"
+                },
+                "removeAll": {
+                  "example": "any"
                 }
               }
             }
@@ -1509,12 +1512,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
