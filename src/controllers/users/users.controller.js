@@ -204,6 +204,15 @@ const userController = {
         email,
         role,
         registration_number,
+        // const updatedUser = await user.update({
+        //   first_name: first_name || user.first_name,
+        //   last_name: last_name || user.last_name,
+        //   address: address || user.address,
+        //   phone: phone || user.phone,
+        //   matricula: matricula || user.matricula,
+        //   email: email || user.email,
+        //   role: role || user.role,
+        //   registration_number: registration_number || user.registration_number,
         image_url: image ? result.url : user.image_url,
       });
 
