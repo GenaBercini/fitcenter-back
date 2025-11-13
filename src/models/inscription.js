@@ -2,6 +2,8 @@ import { DataTypes } from "sequelize";
 import sequelize from "../../config/database.js";
 import Activity from "./Activity.js";
 import Schedule from "./Schedule.js";
+import Routine from "./Routine.js";
+
 import User from "./User.js";
 
 const Inscription = sequelize.define(
@@ -13,7 +15,7 @@ const Inscription = sequelize.define(
       primaryKey: true,
     },
     type: {
-      type: DataTypes.ENUM("activity", "schedule"),
+      type: DataTypes.ENUM("activity", "schedule", "routine"),
       allowNull: false,
     },
   },
@@ -31,5 +33,8 @@ Inscription.belongsTo(Activity, { foreignKey: "activityId" });
 
 Schedule.hasMany(Inscription, { foreignKey: "scheduleId" });
 Inscription.belongsTo(Schedule, { foreignKey: "scheduleId" });
+
+Routine.hasMany(Inscription, { foreignKey: "routineId" });
+Inscription.belongsTo(Routine, { foreignKey: "routineId" });
 
 export default Inscription;

@@ -216,11 +216,16 @@ const userController = {
         image_url: image ? result.url : user.image_url,
       });
 
-      res.status(201).json({
+      // res.status(201).json({
+      //   success: true,
+      //   message: "Usuario actualizado correctamente",
+      //   token: data.session?.access_token || "",
+      //   data: updatedUser,
+      // });
+      res.status(200).json({
         success: true,
         message: "Usuario actualizado correctamente",
-        token: data.session?.access_token || "",
-        data: updatedUser,
+        data: user,
       });
     } catch (error) {
       next(error);
