@@ -96,7 +96,7 @@ const userController = {
         success: true,
         msg: "User created successfully",
         token: data.session?.access_token || "",
-        data: newUser
+        data: newUser,
       });
     } catch (error) {
       next(error);
@@ -185,23 +185,47 @@ const userController = {
           return next(new ErrorResponse("Error al actualizar imagen", 400));
       }
 
-      const updatedUser = await user.update({
-        first_name: first_name || user.first_name,
-        last_name: last_name || user.last_name,
-        address: address || user.address,
-        phone: phone || user.phone,
-        matricula: matricula || user.matricula,
-        email: email || user.email,
-        role: role || user.role,
-        registration_number: registration_number || user.registration_number,
+      // await user.update({
+      //   first_name: first_name || user.first_name,
+      //   last_name: last_name || user.last_name,
+      //   address: address || user.address,
+      //   phone: phone || user.phone,
+      //   email: email || user.email,
+      //   role: role || user.role,
+      //   registration_number: registration_number || user.registration_number,
+      //   image_url: image ? result.url : user.image_url,
+      // });
+
+      await user.update({
+        first_name,
+        last_name,
+        address,
+        phone,
+        email,
+        role,
+        registration_number,
+        // const updatedUser = await user.update({
+        //   first_name: first_name || user.first_name,
+        //   last_name: last_name || user.last_name,
+        //   address: address || user.address,
+        //   phone: phone || user.phone,
+        //   matricula: matricula || user.matricula,
+        //   email: email || user.email,
+        //   role: role || user.role,
+        //   registration_number: registration_number || user.registration_number,
         image_url: image ? result.url : user.image_url,
       });
 
-      res.status(201).json({
+      // res.status(201).json({
+      //   success: true,
+      //   message: "Usuario actualizado correctamente",
+      //   token: data.session?.access_token || "",
+      //   data: updatedUser,
+      // });
+      res.status(200).json({
         success: true,
         message: "Usuario actualizado correctamente",
-        token: data.session?.access_token || "",
-        data: updatedUser,
+        data: user,
       });
     } catch (error) {
       next(error);
@@ -347,8 +371,7 @@ const userController = {
 
     try {
       const user = await User.findByPk(userId);
-      if (!user)
-        return next(new ErrorResponse("Usuario no encontrado", 404));
+      if (!user) return next(new ErrorResponse("Usuario no encontrado", 404));
 
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
@@ -358,7 +381,7 @@ const userController = {
             price_data: {
               currency: "usd",
               product_data: { name: "Membresía PRO (1 mes)" },
-              unit_amount: 10 * 100, 
+              unit_amount: 10 * 100,
             },
             quantity: 1,
           },

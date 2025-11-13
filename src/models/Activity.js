@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../config/database.js";
+import User from "./User.js";
 
 const Activity = sequelize.define(
   "Activity",
@@ -43,5 +44,10 @@ const Activity = sequelize.define(
     timestamps: true,
   }
 );
+
+Activity.belongsTo(User, {
+  foreignKey: "instructorId",
+  as: "instructor",
+});
 
 export default Activity;
