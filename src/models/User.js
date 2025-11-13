@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../config/database.js";
-import Activity from "./Activity.js";
+import Activity from "../models/Activity.js";
 
 const User = sequelize.define(
   "User",
@@ -72,4 +72,5 @@ const User = sequelize.define(
   }
 );
 User.hasMany(Activity, { as: "activities", foreignKey: "instructorId" });
+Activity.belongsTo(User, { as: "instructor", foreignKey: "instructorId" });
 export default User;
