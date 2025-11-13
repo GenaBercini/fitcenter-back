@@ -1,5 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../config/database.js";
+import User from "./User.js";
+
 const Routine = sequelize.define(
   "Routine",
   {
@@ -18,5 +20,6 @@ const Routine = sequelize.define(
   },
   {}
 );
+Routine.belongsTo(User, { foreignKey: "professorId", as: "professor" });
 
 export default Routine;

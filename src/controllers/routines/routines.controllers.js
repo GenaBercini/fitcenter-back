@@ -6,17 +6,12 @@ const routinesController = {
   getAllRoutines: async (req, res, next) => {
     try {
       const allRoutines = await Routine.findAll({
-        where: {
-          disabled: false,
-        },
+        where: { disabled: false },
         include: [
           {
             model: Exercise,
-            attributes: ["name", "typeEx"],
-            as: "exercise",
-            through: {
-              attributes: ["series", "repetitions"],
-            },
+            as: "exercises",
+            attributes: ["id", "name", "typeEx"],
           },
         ],
       });
@@ -34,7 +29,7 @@ const routinesController = {
         data: allRoutines,
       });
     } catch (error) {
-      console.error(error.mesagge);
+      console.error(error.message);
       next(error);
     }
   },
@@ -78,35 +73,26 @@ const routinesController = {
 
   createRoutine: async (req, res, next) => {
     try {
-      const { typeRoutine, descRoutine, exercises } = req.body;
+      const { typeRoutine, descRoutine, professorId, exercises } = req.body;
 
-      if (
-        !typeRoutine ||
-        !descRoutine ||
-        !Array.isArray(exercises) ||
-        exercises.length === 0
-      ) {
+      if (!typeRoutine || !descRoutine) {
         return res.status(400).json({
           success: false,
           msg: "Faltan campos obligatorios",
         });
       }
 
-      const newRoutine = await Routine.create({ typeRoutine, descRoutine });
+      const newRoutine = await Routine.create({
+        typeRoutine,
+        descRoutine,
+        professorId,
+      });
 
-      for (const exercise of exercises) {
-        if (!exercise.id || !exercise.series || !exercise.repetitions) {
-          return res.status(400).json({
-            error: "Cada ejercicio debe tener id, series y repetitions",
-          });
-        }
-
-        await RoutineExe.create({
-          routineId: newRoutine.id,
-          exerciseId: exercise.id,
-          series: exercise.series,
-          repetitions: exercise.repetitions,
-        });
+      if (Array.isArray(exercises) && exercises.length > 0) {
+        await Exercise.update(
+          { routineId: newRoutine.id },
+          { where: { id: exercises } }
+        );
       }
 
       res.status(201).json({
