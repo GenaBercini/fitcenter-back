@@ -1,37 +1,99 @@
 import Activity from "../../models/Activity.js";
+import User from "../../models/User.js";
 
 const activityController = {
   getAllActivities: async (req, res) => {
     try {
-      const activities = await Activity.findAll();
-      res.send(activities);
+      const activities = await Activity.findAll({
+        include: [
+          {
+            model: User,
+            as: "instructor",
+            attributes: ["id", "first_name", "last_name", "email"],
+          },
+        ],
+      });
+      res.status(200).json(activities);
     } catch (err) {
+      console.error("Error al obtener actividades:", err);
       res.status(500).send("Database error");
     }
   },
 
   getActivityById: async (req, res) => {
     try {
-      const activity = await Activity.findByPk(req.params.id);
+      const activity = await Activity.findByPk(req.params.id, {
+        include: [
+          {
+            model: User,
+            as: "instructor",
+            attributes: ["id", "first_name", "last_name", "email"],
+          },
+        ],
+      });
+
       if (!activity) return res.status(404).send("Activity not found");
-      res.send(activity);
+      res.json(activity);
     } catch (err) {
+      console.error("Error al obtener actividad:", err);
       res.status(500).send("Database error");
     }
   },
+  // createActivity: async (req, res) => {
+  //   try {
+  //     const { name, startTime, endTime, capacity, instructorId, description } =
+  //       req.body;
 
+  //     if (!name || !instructorId || !startTime || !endTime || !capacity) {
+  //       return res.status(400).send("Faltan datos obligatorios");
+  //     }
+
+  //     const newActivity = await Activity.create({
+  //       name,
+  //       startTime,
+  //       endTime,
+  //       capacity,
+  //       description,
+  //       instructorId,
+  //     });
+
+  //     res.status(201).json(newActivity);
+  //   } catch (err) {
+  //     console.error("Error al crear actividad:", err);
+  //     res.status(500).send("Database error");
+  //   }
+  // },
   createActivity: async (req, res) => {
     try {
-      const { name, startTime, endTime, capacity, instructor } = req.body;
+      const { name, startTime, endTime, capacity, instructorId, description } =
+        req.body;
+
+      if (!name || !instructorId || !startTime || !endTime || !capacity) {
+        return res.status(400).send("Faltan datos obligatorios");
+      }
+
       const newActivity = await Activity.create({
         name,
         startTime,
         endTime,
         capacity,
-        instructor,
+        description,
+        instructorId,
       });
-      res.status(201).send(newActivity);
+
+      const activityWithInstructor = await Activity.findByPk(newActivity.id, {
+        include: [
+          {
+            model: User,
+            as: "instructor",
+            attributes: ["id", "first_name", "last_name", "email"],
+          },
+        ],
+      });
+
+      res.status(201).json(activityWithInstructor);
     } catch (err) {
+      console.error("Error al crear actividad:", err);
       res.status(500).send("Database error");
     }
   },
@@ -41,10 +103,18 @@ const activityController = {
       const activity = await Activity.findByPk(req.params.id);
       if (!activity) return res.status(404).send("Activity not found");
 
-      const { name, startTime, endTime, capacity, instructor } = req.body;
-      await activity.update({ name, startTime, endTime, capacity, instructor });
-      res.send(activity);
+      const { name, startTime, endTime, capacity, description } = req.body;
+      await activity.update({
+        name,
+        startTime,
+        endTime,
+        capacity,
+        description,
+      });
+
+      res.json(activity);
     } catch (err) {
+      console.error("Error al actualizar actividad:", err);
       res.status(500).send("Database error");
     }
   },
@@ -55,13 +125,13 @@ const activityController = {
       if (!activity) return res.status(404).send("Activity not found");
 
       await activity.destroy();
-      res.send({ message: "Activity deleted", id: req.params.id });
+      res.json({ message: "Activity deleted", id: req.params.id });
     } catch (err) {
+      console.error("Error al eliminar actividad:", err);
       res.status(500).send("Database error");
     }
   },
 
-  // inscripción en actividad
   inscribeActivity: async (req, res) => {
     try {
       const { id } = req.params;
@@ -75,7 +145,7 @@ const activityController = {
 
       if (activity.capacity > 0) {
         activity.capacity -= 1;
-        await activity.save(); // guardamos el nuevo valor
+        await activity.save();
         return res.json({
           success: true,
           message: `Inscripción confirmada en ${activity.name}`,
@@ -88,6 +158,7 @@ const activityController = {
         });
       }
     } catch (err) {
+      console.error("Error en inscripción:", err);
       res.status(500).json({ success: false, message: "Database error" });
     }
   },

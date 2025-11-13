@@ -29,9 +29,13 @@ const Activity = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    instructor: {
-      type: DataTypes.STRING,
+    instructorId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "users",
+        key: "id",
+      },
     },
   },
   {

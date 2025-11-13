@@ -1,6 +1,8 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../config/database.js";
 import Routine from "./Routine.js";
+import User from "./User.js";
+
 const Exercise = sequelize.define(
   "Exercise",
   {
@@ -16,7 +18,8 @@ const Exercise = sequelize.define(
   {}
 );
 
-Exercise.belongsToMany(Routine, { through: "RoutineExercises" });
-Routine.belongsToMany(Exercise, { through: "RoutineExercises" });
+Exercise.belongsTo(Routine, { foreignKey: "routineId", as: "routine" });
+Routine.hasMany(Exercise, { foreignKey: "routineId", as: "exercises" });
 
+Exercise.belongsTo(User, { foreignKey: "professorId", as: "professor" });
 export default Exercise;
