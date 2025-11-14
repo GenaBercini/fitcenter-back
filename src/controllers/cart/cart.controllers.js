@@ -1,10 +1,11 @@
-import Cart from "../../models/Cart.js";
+import Cart from "../../models/cart.js";
 import CartItem from "../../models/CartItem.js";
 import Product from "../../models/Product.js";
 import User from "../../models/User.js";
 import { calculateCartTotal } from "../../utils/calculateCartTotal.js";
 import ErrorResponse from "../../utils/errorConstructor.js";
 import stripe from "../../../config/stripe.js";
+import { fn, col, literal } from "sequelize";
 
 const cartController = {
   getAllCarts: async (req, res, next) => {
@@ -65,7 +66,34 @@ const cartController = {
       next(error);
     }
   },
+  getBestSeller: async (req, res, next) => {
+  try {
+    const bestSellers = await CartItem.findAll({
+      attributes: [
+        "productId",
+        [fn("SUM", col("quantity")), "totalSold"],
+      ],
+      include: [
+        {
+          model: Product,
+          as: "product",
+          attributes: ["name", "price", "img"],
+        },
+      ],
+      group: ["productId", "product.id"],
+      order: [[literal("totalSold"), "DESC"]],
+      limit: 4,
+    });
 
+    res.status(200).json({
+      success: true,
+      message: "Productos más vendidos obtenidos",
+      data: bestSellers,
+    });
+  } catch (err) {
+    next(err);
+  }
+},
   addToCart: async (req, res, next) => {
     const { idCart } = req.params;
     const { productId } = req.body;
