@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -L",
     "swagger": "node config/swagger.js",
-    "dev": "nodemon -L index.js"
+    "dev": "npm run seed && npm run swagger && concurrently \"nodemon -L index.js\""
   },
   "repository": {
     "type": "git",
@@ -38,6 +38,7 @@
     "stripe": "^19.1.0"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "install": "^0.13.0",
     "npm": "^11.5.2",
     "swagger-autogen": "^2.23.7",

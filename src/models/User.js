@@ -52,7 +52,7 @@ const User = sequelize.define(
       defaultValue: false,
     },
     membershipType: {
-      type: DataTypes.ENUM("Guest", "Premium", "Pending"),
+      type: DataTypes.ENUM("Guest","Basic", "Premium", "Pending"),
       allowNull: false,
       defaultValue: "Guest",
     },
