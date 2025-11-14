@@ -1,6 +1,7 @@
 import e from "express";
 import Exercise from "../../models/Exercise.js";
 import Routine from "../../models/Routine.js";
+import User from "../../models/User.js";
 
 const routinesController = {
   getAllRoutines: async (req, res, next) => {
@@ -12,6 +13,11 @@ const routinesController = {
             model: Exercise,
             as: "exercises",
             attributes: ["id", "name", "typeEx"],
+          },
+          {
+            model: User,
+            as: "professor",
+            attributes: ["first_name", "last_name"],
           },
         ],
       });
@@ -44,11 +50,8 @@ const routinesController = {
         include: [
           {
             model: Exercise,
+            as: "exercises",
             attributes: ["name", "typeEx"],
-            as: "exercise",
-            through: {
-              attributes: ["series", "repetitions"],
-            },
           },
         ],
       });
@@ -125,15 +128,14 @@ const routinesController = {
         });
       }
 
-      const exercise = await Exercise.findByPk(id);
-      if (!exercise) {
-        return res.status(404).json({
-          success: false,
-          msg: "Rutina no encontrada",
-        });
+      const routine = await Routine.findByPk(id);
+      if (!routine) {
+        return res
+          .status(404)
+          .json({ success: false, msg: "Rutina no encontrada" });
       }
 
-      await exercise.update({ disabled });
+      await routine.update({ disabled });
 
       res.status(200).json({
         success: true,
