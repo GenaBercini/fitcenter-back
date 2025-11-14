@@ -32,11 +32,11 @@ const server = express();
 
 server.use("/uploads", express.static("uploads"));
 
+server.post('/webhook/stripe', express.raw({ type: 'application/json' }), stripeController.stripeWebhook);
 server.use(express.json());
 server.set('port', 3000);
 
 // Middlewares
-server.post('/webhook/stripe', express.raw({ type: 'application/json' }), stripeController.stripeWebhook);
 server.use(express.json({ limit: "10mb" }));
 server.use(express.urlencoded({ limit: "10mb", extended: true }));
 server.use(cookieParser());

@@ -52,7 +52,7 @@
                 "name": {
                   "example": "any"
                 },
-                "img": {
+                "active": {
                   "example": "any"
                 }
               }
@@ -110,7 +110,10 @@
                 "name": {
                   "example": "any"
                 },
-                "img": {
+                "active": {
+                  "example": "any"
+                },
+                "lastImg": {
                   "example": "any"
                 }
               }
@@ -454,6 +457,18 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "membershipType": {
+                  "example": "any"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -1016,8 +1031,14 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -1084,6 +1105,9 @@
                   "example": "any"
                 },
                 "descRoutine": {
+                  "example": "any"
+                },
+                "professorId": {
                   "example": "any"
                 },
                 "exercises": {
@@ -1191,7 +1215,10 @@
                 "capacity": {
                   "example": "any"
                 },
-                "instructor": {
+                "instructorId": {
+                  "example": "any"
+                },
+                "description": {
                   "example": "any"
                 }
               }
@@ -1201,6 +1228,9 @@
         "responses": {
           "201": {
             "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1258,7 +1288,7 @@
                 "capacity": {
                   "example": "any"
                 },
-                "instructor": {
+                "description": {
                   "example": "any"
                 }
               }

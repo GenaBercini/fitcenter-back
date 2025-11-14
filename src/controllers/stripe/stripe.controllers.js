@@ -3,7 +3,6 @@ import Cart from "../../models/Cart.js";
 import User from "../../models/User.js";
 import ErrorResponse from "../../utils/errorConstructor.js";
 
-
 const stripeController = {
   stripeWebhook: async (req, res, next) => {
     const sig = req.headers["stripe-signature"];
@@ -33,27 +32,39 @@ const stripeController = {
           await cart.save();
         }
       }
+    }
+
+    if (event.type === "invoice.payment_succeeded") {
+      const invoice = event.data.object;
+
+      const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+      const metadata = subscription.metadata || {};
+
+      console.log("METADATA DE SUBSCRIPCIÓN:", metadata);
 
       if (metadata.membershipPayment === "true" && metadata.userId) {
         const user = await User.findByPk(metadata.userId);
+
         if (user) {
           const startDate = new Date();
           const endDate = new Date();
           endDate.setDate(startDate.getDate() + 30);
 
-          user.membershipType = "Premium";
+          user.membershipType = metadata.membershipType;
           user.membershipStartDate = startDate;
           user.membershipEndDate = endDate;
+
           await user.save();
         }
       }
     }
 
     res.json({
-        success: true,
-        message: "Webhook received",
-      });
+      success: true,
+      message: "Webhook received"
+    });
   },
 };
 
 export default stripeController;
+

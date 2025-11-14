@@ -390,28 +390,95 @@ const userController = {
   },
   createCheckoutMembership: async (req, res, next) => {
     const { userId } = req.params;
+    const { membershipType } = req.body;
 
     try {
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return next(
+          new ErrorResponse(
+            "STRIPE_SECRET_KEY no configurada en el entorno",
+            500
+          )
+        );
+      }
+
+      if (!membershipType || !["Basic", "Premium"].includes(membershipType)) {
+        return next(
+          new ErrorResponse('membershipType debe ser "Basic" o "Premium"', 400)
+        );
+      }
+
+      const priceId =
+        membershipType === "Basic"
+          ? process.env.PRICE_BASIC
+          : process.env.PRICE_PREMIUM;
+      if (!priceId) {
+        return next(
+          new ErrorResponse(
+            `No se encontró PRICE para ${membershipType}. Revise las variables de entorno PRICE_BASIC / PRICE_PREMIUM`,
+            500
+          )
+        );
+      }
+
+      let priceObj;
+      try {
+        priceObj = await stripe.prices.retrieve(priceId);
+      } catch (err) {
+        return next(
+          new ErrorResponse(
+            `Error al validar el Price en Stripe: ${err.message}`,
+            400
+          )
+        );
+      }
+
+      if (!priceObj) {
+        return next(
+          new ErrorResponse(
+            "Price no encontrado en Stripe. Verifique el ID de precio.",
+            400
+          )
+        );
+      }
+
+      if (!priceObj.recurring) {
+        return next(
+          new ErrorResponse(
+            "El Price configurado no es recurrente. Para suscripciones el Price en Stripe debe tener un campo `recurring` (usar un Price de tipo suscripción).",
+            400
+          )
+        );
+      }
       const user = await User.findByPk(userId);
       if (!user) return next(new ErrorResponse("Usuario no encontrado", 404));
 
       const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        mode: "payment",
+        mode: "subscription",
+        payment_method_collection: "always",
         line_items: [
           {
-            price_data: {
-              currency: "usd",
-              product_data: { name: "Membresía PRO (1 mes)" },
-              unit_amount: 10 * 100,
-            },
+            price: priceId,
             quantity: 1,
           },
         ],
-        metadata: { userId, membershipPayment: "true" },
-        success_url: `${process.env.CLIENT_URL}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
+        metadata: {
+          userId,
+          membershipPayment: "true",
+          membershipType,
+        },
+        subscription_data: {
+          metadata: {
+            userId,
+            membershipPayment: "true",
+            membershipType,
+          },
+        },
+        // success_url: `${process.env.CLIENT_URL}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${process.env.CLIENT_URL}/}`,
         cancel_url: `${process.env.CLIENT_URL}/membership/cancel`,
       });
+
       user.membershipType = "Pending";
       await user.save();
       res.json({
