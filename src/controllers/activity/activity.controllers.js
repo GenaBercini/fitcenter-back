@@ -39,30 +39,7 @@ const activityController = {
       res.status(500).send("Database error");
     }
   },
-  // createActivity: async (req, res) => {
-  //   try {
-  //     const { name, startTime, endTime, capacity, instructorId, description } =
-  //       req.body;
 
-  //     if (!name || !instructorId || !startTime || !endTime || !capacity) {
-  //       return res.status(400).send("Faltan datos obligatorios");
-  //     }
-
-  //     const newActivity = await Activity.create({
-  //       name,
-  //       startTime,
-  //       endTime,
-  //       capacity,
-  //       description,
-  //       instructorId,
-  //     });
-
-  //     res.status(201).json(newActivity);
-  //   } catch (err) {
-  //     console.error("Error al crear actividad:", err);
-  //     res.status(500).send("Database error");
-  //   }
-  // },
   createActivity: async (req, res) => {
     try {
       const { name, startTime, endTime, capacity, instructorId, description } =
@@ -97,7 +74,18 @@ const activityController = {
       res.status(500).send("Database error");
     }
   },
+  deleteActivity: async (req, res) => {
+    try {
+      const activity = await Activity.findByPk(req.params.id);
+      if (!activity) return res.status(404).send("Activity not found");
 
+      await activity.destroy();
+      res.status(200).send("Activity deleted");
+    } catch (err) {
+      console.error("Error al eliminar actividad:", err);
+      res.status(500).send("Database error");
+    }
+  },
   updateActivity: async (req, res) => {
     try {
       const activity = await Activity.findByPk(req.params.id);

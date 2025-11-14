@@ -45,9 +45,6 @@ const Activity = sequelize.define(
   }
 );
 
-Activity.belongsTo(User, {
-  foreignKey: "instructorId",
-  as: "instructor",
-});
+Activity.belongsTo(User, { foreignKey: "instructorId", as: "instructor" });
 
 export default Activity;

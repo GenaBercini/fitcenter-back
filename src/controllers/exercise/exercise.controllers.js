@@ -5,7 +5,7 @@ const exercisesControllers = {
     try {
       const allExercises = await Exercise.findAll();
 
-      if (!allExercises.lenght) {
+      if (!allExercises.length) {
         return res.status(400).json({
           success: false,
           msg: "Ejercicios no encontrados",
@@ -74,7 +74,23 @@ const exercisesControllers = {
       next(error);
     }
   },
+  deleteExercise: async (req, res) => {
+    try {
+      const { id } = req.params;
 
+      const deleted = await Exercise.destroy({
+        where: { id },
+      });
+
+      if (!deleted) {
+        return res.status(404).json({ msg: "Ejercicio no encontrado" });
+      }
+
+      return res.json({ msg: "Ejercicio eliminado correctamente" });
+    } catch (err) {
+      res.status(500).json({ msg: "Error al eliminar ejercicio" });
+    }
+  },
   updateExercise: async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -106,7 +122,8 @@ const exercisesControllers = {
 
       res.status(200).json({
         success: true,
-        msg: "Ejercicios actualizado",
+        msg: "Ejercicio actualizado",
+        data: exercise,
       });
     } catch (error) {
       console.log(error.message);

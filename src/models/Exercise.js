@@ -20,6 +20,5 @@ const Exercise = sequelize.define(
 
 Exercise.belongsTo(Routine, { foreignKey: "routineId", as: "routine" });
 Routine.hasMany(Exercise, { foreignKey: "routineId", as: "exercises" });
-
 Exercise.belongsTo(User, { foreignKey: "professorId", as: "professor" });
 export default Exercise;
