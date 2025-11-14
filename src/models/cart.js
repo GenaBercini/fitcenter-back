@@ -7,6 +7,10 @@ const Cart = sequelize.define("Cart", {
     primaryKey: true,
     autoIncrement: true,
   },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
   total: {
     type: DataTypes.FLOAT,
     defaultValue: 0,
@@ -30,6 +34,5 @@ const Cart = sequelize.define("Cart", {
   createdAt: DataTypes.DATE,
   updatedAt: DataTypes.DATE,
 });
-
 
 export default Cart;
