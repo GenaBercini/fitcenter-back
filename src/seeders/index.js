@@ -2,6 +2,7 @@ import "dotenv/config.js";
 import sequelize from "../models/index.js";
 import seedUsers from "./users.seed.js";
 import seedProducts from "./products.seed.js";
+import seedCategories from "./categories.seed.js";
 
 (async () => {
   try {
@@ -12,6 +13,7 @@ import seedProducts from "./products.seed.js";
 
     console.log("Ejecutando seeds...");
     await seedUsers();
+    await seedCategories();
     await seedProducts();
 
     console.log("Seeds ejecutados correctamente");
