@@ -5,7 +5,7 @@ const seedProducts = async () => {
   const products = [
     {
       name: "Whey Protein 2lb",
-      img: "https://example.com/whey.jpg",
+      img: "https://cgkwvxeecaiaejwsuurm.supabase.co/storage/v1/object/public/user-images/public/143033_suplemento-dietario-whey-protein-sabor-vainilla-en-polvo-x-1000-g__imagen-1.webp",
       price: 29999,
       description: "Proteína concentrada de suero de alta calidad.",
       stock: 30,
@@ -13,7 +13,7 @@ const seedProducts = async () => {
     },
     {
       name: "Creatina Monohidratada 300g",
-      img: "https://example.com/creatina.jpg",
+      img: "https://cgkwvxeecaiaejwsuurm.supabase.co/storage/v1/object/public/user-images/public/39.avif",
       price: 18999,
       description: "Creatina pura para mejorar fuerza y rendimiento.",
       stock: 50,
@@ -21,7 +21,7 @@ const seedProducts = async () => {
     },
     {
       name: "Cinturón de Levantamiento",
-      img: "https://example.com/cinturon.jpg",
+      img: "https://cgkwvxeecaiaejwsuurm.supabase.co/storage/v1/object/public/user-images/public/Cinturon-de-levantamiento-para-crossfit-con-abrojo.jpg",
       price: 14999,
       description: "Cinturón reforzado para levantamiento pesado.",
       stock: 20,
@@ -29,7 +29,7 @@ const seedProducts = async () => {
     },
     {
       name: "Remera Dry Fit",
-      img: "https://example.com/remera.jpg",
+      img: "https://cgkwvxeecaiaejwsuurm.supabase.co/storage/v1/object/public/user-images/public/17083093140d9dca4ae2c32454e5a0a83862e927ba_thumbnail_405x.webp",
       price: 8999,
       description: "Remera deportiva transpirable y ligera.",
       stock: 40,

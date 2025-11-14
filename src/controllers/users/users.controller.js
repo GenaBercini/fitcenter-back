@@ -391,6 +391,7 @@ const userController = {
   createCheckoutMembership: async (req, res, next) => {
     const { userId } = req.params;
     const { membershipType } = req.body;
+    console.log(membershipType);
 
     try {
       if (!process.env.STRIPE_SECRET_KEY) {
