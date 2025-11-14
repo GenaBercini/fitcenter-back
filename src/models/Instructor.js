@@ -1,14 +1,11 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../../config/database.js';
+import { DataTypes } from "sequelize";
+import sequelize from "../../config/database.js";
 
-const Instructor = sequelize.define(
-  'Instructor',
-  {
-    registration_number: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
+const Instructor = sequelize.define("Instructor", {
+  registration_number: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
-);
+});
 
 export default Instructor;

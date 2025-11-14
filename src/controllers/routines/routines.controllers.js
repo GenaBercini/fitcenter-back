@@ -39,19 +39,57 @@ const routinesController = {
       next(error);
     }
   },
+  deleteRoutine: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          msg: "Falta el ID de la rutina",
+        });
+      }
+
+      const routine = await Routine.findByPk(id);
+
+      if (!routine || routine.disabled) {
+        return res.status(404).json({
+          success: false,
+          msg: "Rutina no encontrada o ya está deshabilitada",
+        });
+      }
+
+      await Exercise.update({ routineId: null }, { where: { routineId: id } });
+
+      await routine.update({ disabled: true });
+
+      res.status(200).json({
+        success: true,
+        msg: "Rutina eliminada (deshabilitada) con éxito",
+        data: routine,
+      });
+    } catch (error) {
+      console.error(error.message);
+      next(error);
+    }
+  },
 
   getRoutineById: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const routine = await Routine.findByPk(id, {
-        where: {
-          disabled: false,
-        },
+
+      const routine = await Routine.findOne({
+        where: { id, disabled: false },
         include: [
           {
             model: Exercise,
             as: "exercises",
-            attributes: ["name", "typeEx"],
+            attributes: ["id", "name", "typeEx"],
+          },
+          {
+            model: User,
+            as: "professor",
+            attributes: ["first_name", "last_name"],
           },
         ],
       });
@@ -63,7 +101,7 @@ const routinesController = {
         });
       }
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         msg: "Rutina encontrada",
         data: routine,
@@ -74,6 +112,55 @@ const routinesController = {
     }
   },
 
+  updateRoutine: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { typeRoutine, descRoutine, exercises } = req.body;
+
+      const routine = await Routine.findByPk(id);
+
+      if (!routine) {
+        return res.status(404).json({
+          success: false,
+          msg: "Rutina no encontrada",
+        });
+      }
+
+      await routine.update({
+        typeRoutine,
+        descRoutine,
+      });
+
+      await Exercise.update({ routineId: null }, { where: { routineId: id } });
+
+      if (Array.isArray(exercises) && exercises.length > 0) {
+        await Exercise.update({ routineId: id }, { where: { id: exercises } });
+      }
+      const updatedRoutine = await Routine.findByPk(id, {
+        include: [
+          {
+            model: Exercise,
+            as: "exercises",
+            attributes: ["id", "name", "typeEx"],
+          },
+          {
+            model: User,
+            as: "professor",
+            attributes: ["first_name", "last_name"],
+          },
+        ],
+      });
+
+      return res.status(200).json({
+        success: true,
+        msg: "Rutina actualizada con éxito",
+        data: updatedRoutine,
+      });
+    } catch (error) {
+      console.error(error.message);
+      next(error);
+    }
+  },
   createRoutine: async (req, res, next) => {
     try {
       const { typeRoutine, descRoutine, professorId, exercises } = req.body;
@@ -84,7 +171,6 @@ const routinesController = {
           msg: "Faltan campos obligatorios",
         });
       }
-
       const newRoutine = await Routine.create({
         typeRoutine,
         descRoutine,
@@ -98,10 +184,25 @@ const routinesController = {
         );
       }
 
+      const routineWithRelations = await Routine.findByPk(newRoutine.id, {
+        include: [
+          {
+            model: Exercise,
+            as: "exercises",
+            attributes: ["id", "name", "typeEx"],
+          },
+          {
+            model: User,
+            as: "professor",
+            attributes: ["first_name", "last_name"],
+          },
+        ],
+      });
+
       res.status(201).json({
         success: true,
         msg: "Rutina creada con éxito",
-        data: newRoutine,
+        data: routineWithRelations,
       });
     } catch (error) {
       console.error(error.message);
@@ -142,7 +243,7 @@ const routinesController = {
         msg: `Estado de la rutina actualizado a ${
           disabled ? "deshabilitado" : "habilitado"
         }`,
-        data: e,
+        data: routine,
       });
     } catch (error) {
       console.error(error.message);
