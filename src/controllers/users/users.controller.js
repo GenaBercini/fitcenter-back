@@ -131,6 +131,28 @@ const userController = {
       next(error);
     }
   },
+  getUsersByRole: async (req, res, next) => {
+  try {
+    const { role } = req.params;
+    if (!role) return next(new ErrorResponse("El rol no puede ser nulo", 400));
+
+    const users = await User.findAll({
+      where: { role }
+    });
+
+    if (!users || users.length === 0)
+      return next(new ErrorResponse("No se encontraron usuarios con ese rol", 404));
+
+    res.status(200).json({
+      success: true,
+      message: "Usuarios obtenidos correctamente",
+      data: users,
+    });
+  } catch (error) {
+    next(error);
+  }
+},
+
   updateUser: async (req, res, next) => {
     try {
       const { id } = req.params;
