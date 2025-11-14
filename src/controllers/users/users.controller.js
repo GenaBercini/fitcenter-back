@@ -132,26 +132,29 @@ const userController = {
     }
   },
   getUsersByRole: async (req, res, next) => {
-  try {
-    const { role } = req.params;
-    if (!role) return next(new ErrorResponse("El rol no puede ser nulo", 400));
+    try {
+      const { role } = req.params;
+      if (!role)
+        return next(new ErrorResponse("El rol no puede ser nulo", 400));
 
-    const users = await User.findAll({
-      where: { role }
-    });
+      const users = await User.findAll({
+        where: { role },
+      });
 
-    if (!users || users.length === 0)
-      return next(new ErrorResponse("No se encontraron usuarios con ese rol", 404));
+      if (!users || users.length === 0)
+        return next(
+          new ErrorResponse("No se encontraron usuarios con ese rol", 404)
+        );
 
-    res.status(200).json({
-      success: true,
-      message: "Usuarios obtenidos correctamente",
-      data: users,
-    });
-  } catch (error) {
-    next(error);
-  }
-},
+      res.status(200).json({
+        success: true,
+        message: "Usuarios obtenidos correctamente",
+        data: users,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 
   updateUser: async (req, res, next) => {
     try {
@@ -391,7 +394,6 @@ const userController = {
   createCheckoutMembership: async (req, res, next) => {
     const { userId } = req.params;
     const { membershipType } = req.body;
-    console.log(membershipType);
 
     try {
       if (!process.env.STRIPE_SECRET_KEY) {
@@ -476,7 +478,7 @@ const userController = {
           },
         },
         // success_url: `${process.env.CLIENT_URL}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
-        success_url: `${process.env.CLIENT_URL}/}`,
+        success_url: `${process.env.CLIENT_URL}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.CLIENT_URL}/membership/cancel`,
       });
 

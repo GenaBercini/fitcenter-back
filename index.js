@@ -33,7 +33,6 @@ const server = express();
 server.use("/uploads", express.static("uploads"));
 
 server.post('/webhook/stripe', express.raw({ type: 'application/json' }), stripeController.stripeWebhook);
-server.use(express.json());
 server.set('port', 3000);
 
 // Middlewares
