@@ -1,0 +1,498 @@
+import User from "../../models/User.js";
+import {
+  supabase,
+  updateUserImage,
+  createUserImage,
+} from "../../../config/supabase.config.js";
+import stripe from "../../../config/stripe.js";
+import ErrorResponse from "../../utils/errorConstructor.js";
+
+const redirectUrl = process.env.FRONTEND_URL || "http://localhost:5173/";
+
+const userController = {
+  createUser: async (req, res, next) => {
+    try {
+      const {
+        first_name,
+        last_name,
+        password,
+        address,
+        phone,
+        matricula,
+        email,
+        role,
+        registration_number,
+        image,
+      } = req.body;
+
+      if (!email || !role || !password) {
+        return next(
+          new ErrorResponse("Email, rol y contraseña son obligatorios", 400)
+        );
+      }
+      if (role && !User.rawAttributes.role.values.includes(role)) {
+        return next(
+          new ErrorResponse(
+            `Rol inválido. Roles válidos: ${User.rawAttributes.role.values.join(
+              ", "
+            )}`,
+            400
+          )
+        );
+      }
+
+      if (
+        (role === "professor" || role === "instructor") &&
+        !registration_number
+      ) {
+        return next(
+          new ErrorResponse(
+            "Los profesores e instructores deben tener un número de registro",
+            400
+          )
+        );
+      }
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) return next(new ErrorResponse(error.message, 400));
+
+      res.cookie("sb-access-token", data.session?.access_token || "", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 24,
+      });
+
+      let imageDefinitive = image;
+      if (
+        image !=
+        "https://cgkwvxeecaiaejwsuurm.supabase.co/storage/v1/object/public/user-images/public/4b194a8e-e783-4d30-8da4-3719363e89a8.png"
+      ) {
+        const result = await createUserImage(supabase, data.user.id, image);
+        if (!result.success) {
+          return next(new ErrorResponse("Error al subir imagen", 400));
+        } else {
+          imageDefinitive = result.url;
+        }
+      }
+
+      const newUser = await User.create({
+        first_name,
+        last_name,
+        address,
+        phone,
+        matricula,
+        email,
+
+        uid: data.user.id,
+        role,
+        registration_number:
+          role === "professor" || role === "instructor"
+            ? registration_number
+            : null,
+        image_url: imageDefinitive,
+      });
+
+      res.status(201).json({
+        success: true,
+        msg: "User created successfully",
+        token: data.session?.access_token || "",
+        data: newUser,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+  getAllUsers: async (req, res, next) => {
+    try {
+      const users = await User.findAll();
+      res.status(201).json({
+        success: true,
+        message: "Usuarios obtenidos correctamente",
+        data: users,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+  getUserById: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      if (!id) return next(new ErrorResponse("ID no puede ser nulo", 400));
+
+      const user = await User.findByPk(id);
+      if (!user) return next(new ErrorResponse("Usuario no encontrado", 404));
+
+      res.status(201).json({
+        success: true,
+        message: "Usuario obtenido correctamente",
+        data: user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+  getUsersByRole: async (req, res, next) => {
+    try {
+      const { role } = req.params;
+      if (!role)
+        return next(new ErrorResponse("El rol no puede ser nulo", 400));
+
+      const users = await User.findAll({
+        where: { role },
+      });
+
+      if (!users || users.length === 0)
+        return next(
+          new ErrorResponse("No se encontraron usuarios con ese rol", 404)
+        );
+
+      res.status(200).json({
+        success: true,
+        message: "Usuarios obtenidos correctamente",
+        data: users,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  updateUser: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const {
+        first_name,
+        last_name,
+        address,
+        phone,
+        matricula,
+        email,
+        role,
+        registration_number,
+        image,
+      } = req.body;
+
+      if (!id) return next(new ErrorResponse("ID no puede ser nulo", 400));
+
+      if (
+        !first_name &&
+        !last_name &&
+        !address &&
+        !phone &&
+        !matricula &&
+        !email &&
+        !role &&
+        !registration_number &&
+        !image
+      ) {
+        return next(
+          new ErrorResponse("Debes modificar al menos un campo", 400)
+        );
+      }
+
+      const user = await User.findByPk(id);
+      if (!user) return next(new ErrorResponse("Usuario no encontrado", 404));
+
+      if (
+        role === "professor" ||
+        (role === "instructor" && !registration_number)
+      ) {
+        return next(
+          new ErrorResponse(
+            "Los profesores e instructores deben tener un número de registro",
+            400
+          )
+        );
+      }
+      let result;
+      if (image) {
+        result = await updateUserImage(supabase, user.uid, image);
+        if (!result.success)
+          return next(new ErrorResponse("Error al actualizar imagen", 400));
+      }
+
+      // await user.update({
+      //   first_name: first_name || user.first_name,
+      //   last_name: last_name || user.last_name,
+      //   address: address || user.address,
+      //   phone: phone || user.phone,
+      //   email: email || user.email,
+      //   role: role || user.role,
+      //   registration_number: registration_number || user.registration_number,
+      //   image_url: image ? result.url : user.image_url,
+      // });
+
+      await user.update({
+        first_name,
+        last_name,
+        address,
+        phone,
+        email,
+        role,
+        registration_number,
+        // const updatedUser = await user.update({
+        //   first_name: first_name || user.first_name,
+        //   last_name: last_name || user.last_name,
+        //   address: address || user.address,
+        //   phone: phone || user.phone,
+        //   matricula: matricula || user.matricula,
+        //   email: email || user.email,
+        //   role: role || user.role,
+        //   registration_number: registration_number || user.registration_number,
+        image_url: image ? result.url : user.image_url,
+      });
+
+      // res.status(201).json({
+      //   success: true,
+      //   message: "Usuario actualizado correctamente",
+      //   token: data.session?.access_token || "",
+      //   data: updatedUser,
+      // });
+      res.status(200).json({
+        success: true,
+        message: "Usuario actualizado correctamente",
+        data: user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+  deleteUser: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      if (!id) return next(new ErrorResponse("ID no puede ser nulo", 400));
+
+      const user = await User.findByPk(id);
+      if (!user) return next(new ErrorResponse("Usuario no encontrado", 404));
+
+      await user.destroy();
+      res.status(201).json({
+        success: true,
+        message: "Usuario eliminado correctamente",
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  loginUser: async (req, res, next) => {
+    const { email, password } = req.body;
+    try {
+      if (!email || !password) {
+        return next(
+          new ErrorResponse("Email y contraseña son obligatorios", 400)
+        );
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) return next(new ErrorResponse(error.message, 400));
+
+      res.cookie("sb-access-token", data.session?.access_token || "", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 24,
+      });
+
+      const userDB = await User.findOne({ where: { uid: data.user.id } });
+      if (!userDB) return next(new ErrorResponse("Usuario no encontrado", 404));
+
+      res.json({
+        success: true,
+        message: "Usuario logueado correctamente",
+        token: data.session?.access_token || "",
+        data: userDB,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  sessionUser: async (req, res, next) => {
+    try {
+      const token = req.cookies["sb-access-token"];
+      if (!token) return next(new ErrorResponse("No autenticado", 401));
+
+      const { data, error } = await supabase.auth.getUser(token);
+      if (error) return next(new ErrorResponse(error.message, 401));
+
+      const userDB = await User.findOne({ where: { uid: data.user.id } });
+      if (!userDB) return next(new ErrorResponse("Usuario no encontrado", 404));
+      res.json({
+        success: true,
+        message: "Sesion encontrada",
+        token: token,
+        data: userDB,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  logoutUser: async (req, res) => {
+    try {
+      res.clearCookie("sb-access-token");
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  },
+  googleLogin: async (req, res, next) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: redirectUrl },
+      });
+
+      if (error) return next(new ErrorResponse(error.message, 400));
+
+      res.redirect(data.url);
+    } catch (error) {
+      next(error);
+    }
+  },
+  googleSave: async (req, res, next) => {
+    try {
+      const { token } = req.body;
+      if (!token) return res.status(400).json({ error: "Token requerido" });
+
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser(token);
+
+      if (error) return res.status(401).json({ error: error.message });
+
+      let userDB = await User.findOne({ where: { uid: user.id } });
+      if (!userDB) {
+        userDB = await User.create({
+          uid: user.id,
+          email: user.email,
+          first_name: user.user_metadata?.full_name || "",
+          role: "client",
+          image_url: user.user_metadata?.avatar_url || null,
+        });
+      }
+
+      res.cookie("sb-access-token", token, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24,
+      });
+
+      res.json({
+        success: true,
+        message: "Usuario de Google guardado",
+        token: token,
+        data: userDB,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+  createCheckoutMembership: async (req, res, next) => {
+    const { userId } = req.params;
+    const { membershipType } = req.body;
+
+    try {
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return next(
+          new ErrorResponse(
+            "STRIPE_SECRET_KEY no configurada en el entorno",
+            500
+          )
+        );
+      }
+
+      if (!membershipType || !["Basic", "Premium"].includes(membershipType)) {
+        return next(
+          new ErrorResponse('membershipType debe ser "Basic" o "Premium"', 400)
+        );
+      }
+
+      const priceId =
+        membershipType === "Basic"
+          ? process.env.PRICE_BASIC
+          : process.env.PRICE_PREMIUM;
+      if (!priceId) {
+        return next(
+          new ErrorResponse(
+            `No se encontró PRICE para ${membershipType}. Revise las variables de entorno PRICE_BASIC / PRICE_PREMIUM`,
+            500
+          )
+        );
+      }
+
+      let priceObj;
+      try {
+        priceObj = await stripe.prices.retrieve(priceId);
+      } catch (err) {
+        return next(
+          new ErrorResponse(
+            `Error al validar el Price en Stripe: ${err.message}`,
+            400
+          )
+        );
+      }
+
+      if (!priceObj) {
+        return next(
+          new ErrorResponse(
+            "Price no encontrado en Stripe. Verifique el ID de precio.",
+            400
+          )
+        );
+      }
+
+      if (!priceObj.recurring) {
+        return next(
+          new ErrorResponse(
+            "El Price configurado no es recurrente. Para suscripciones el Price en Stripe debe tener un campo `recurring` (usar un Price de tipo suscripción).",
+            400
+          )
+        );
+      }
+      const user = await User.findByPk(userId);
+      if (!user) return next(new ErrorResponse("Usuario no encontrado", 404));
+
+      const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        payment_method_collection: "always",
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1,
+          },
+        ],
+        metadata: {
+          userId,
+          membershipPayment: "true",
+          membershipType,
+        },
+        subscription_data: {
+          metadata: {
+            userId,
+            membershipPayment: "true",
+            membershipType,
+          },
+        },
+        // success_url: `${process.env.CLIENT_URL}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${process.env.CLIENT_URL}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.CLIENT_URL}/membership/cancel`,
+      });
+
+      user.membershipType = "Pending";
+      await user.save();
+      res.json({
+        success: true,
+        message: "Sesión de checkout creada",
+        data: { url: session.url },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+};
+
+export default userController;
