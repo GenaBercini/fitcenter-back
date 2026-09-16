@@ -3,8 +3,8 @@ import sequelize from "../../config/database.js";
 import Activity from "./Activity.js";
 import Schedule from "./Schedule.js";
 import Routine from "./Routine.js";
-
 import User from "./User.js";
+
 
 const Inscription = sequelize.define(
   "Inscription",
