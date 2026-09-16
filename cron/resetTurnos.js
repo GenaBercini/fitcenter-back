@@ -1,6 +1,6 @@
 import cron from "node-cron";
-import Schedule from "../src/seeders/Schedule.js";
-import Inscription from "../src/seeders/Inscription.js";
+import Schedule from "../src/models/Schedule.js";
+import Inscription from "../src/models/Inscription.js";
 import User from "../src/models/User.js";
 
 //  CRON: se ejecuta todos los domingos a las 12 PM (hora del servidor)

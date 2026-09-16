@@ -1,4 +1,4 @@
-import Schedule from "../../seeders/Schedule.js";
+import Schedule from "../../models/Schedule.js";
 
 const scheduleController = {
   getAllSchedules: async (req, res) => {
