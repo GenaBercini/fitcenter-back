@@ -32,7 +32,7 @@ const Schedule = sequelize.define(
   },
   {
     tableName: "schedules",
-    timestamps: true, // createdAt & updatedAt
+    timestamps: true, 
   }
 );
 
