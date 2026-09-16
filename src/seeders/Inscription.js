@@ -1,9 +1,9 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../config/database.js";
-import Activity from "./Activity.js";
+import Activity from "../models/Activity.js";
 import Schedule from "./Schedule.js";
-import Routine from "./Routine.js";
-import User from "./User.js";
+import Routine from "../models/Routine.js";
+import User from "../models/User.js";
 
 
 const Inscription = sequelize.define(

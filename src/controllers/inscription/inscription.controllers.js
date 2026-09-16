@@ -1,7 +1,7 @@
 // controllers/inscription/inscription.controllers.js
 import Activity from "../../models/Activity.js";
-import Schedule from "../../models/Schedule.js";
-import Inscription from "../../models/Inscription.js";
+import Schedule from "../../seeders/Schedule.js";
+import Inscription from "../../seeders/Inscription.js";
 import User from "../../models/User.js";
 import Routine from "../../models/Routine.js";
 
