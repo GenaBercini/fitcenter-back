@@ -1,4 +1,4 @@
-import Subsidiary from "../../models/subsidiary.js"; // Importa el modelo Sucursales
+import Subsidiary from "../../models/Subsidiary.js"; // Importa el modelo Sucursales
 
 const subsidiaryController = {
   // Objeto para agrupar las funciones del controlador
