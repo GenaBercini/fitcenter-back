@@ -27,17 +27,17 @@ const userController = {
 
       if (!email || !role || !password) {
         return next(
-          new ErrorResponse("Email, rol y contraseña son obligatorios", 400)
+          new ErrorResponse("Email, rol y contraseña son obligatorios", 400),
         );
       }
       if (role && !User.rawAttributes.role.values.includes(role)) {
         return next(
           new ErrorResponse(
             `Rol inválido. Roles válidos: ${User.rawAttributes.role.values.join(
-              ", "
+              ", ",
             )}`,
-            400
-          )
+            400,
+          ),
         );
       }
 
@@ -48,8 +48,8 @@ const userController = {
         return next(
           new ErrorResponse(
             "Los profesores e instructores deben tener un número de registro",
-            400
-          )
+            400,
+          ),
         );
       }
       const { data, error } = await supabase.auth.signUp({ email, password });
@@ -143,7 +143,7 @@ const userController = {
 
       if (!users || users.length === 0)
         return next(
-          new ErrorResponse("No se encontraron usuarios con ese rol", 404)
+          new ErrorResponse("No se encontraron usuarios con ese rol", 404),
         );
 
       res.status(200).json({
@@ -185,7 +185,7 @@ const userController = {
         !image
       ) {
         return next(
-          new ErrorResponse("Debes modificar al menos un campo", 400)
+          new ErrorResponse("Debes modificar al menos un campo", 400),
         );
       }
 
@@ -199,8 +199,8 @@ const userController = {
         return next(
           new ErrorResponse(
             "Los profesores e instructores deben tener un número de registro",
-            400
-          )
+            400,
+          ),
         );
       }
       let result;
@@ -279,7 +279,7 @@ const userController = {
     try {
       if (!email || !password) {
         return next(
-          new ErrorResponse("Email y contraseña son obligatorios", 400)
+          new ErrorResponse("Email y contraseña son obligatorios", 400),
         );
       }
 
@@ -312,7 +312,9 @@ const userController = {
 
   sessionUser: async (req, res, next) => {
     try {
-      const token = req.cookies["sb-access-token"];
+      const token =
+        req.cookies?.["sb-access-token"] ||
+        req.headers.authorization?.replace("Bearer ", "");
       if (!token) return next(new ErrorResponse("No autenticado", 401));
 
       const { data, error } = await supabase.auth.getUser(token);
@@ -400,14 +402,14 @@ const userController = {
         return next(
           new ErrorResponse(
             "STRIPE_SECRET_KEY no configurada en el entorno",
-            500
-          )
+            500,
+          ),
         );
       }
 
       if (!membershipType || !["Basic", "Premium"].includes(membershipType)) {
         return next(
-          new ErrorResponse('membershipType debe ser "Basic" o "Premium"', 400)
+          new ErrorResponse('membershipType debe ser "Basic" o "Premium"', 400),
         );
       }
 
@@ -419,8 +421,8 @@ const userController = {
         return next(
           new ErrorResponse(
             `No se encontró PRICE para ${membershipType}. Revise las variables de entorno PRICE_BASIC / PRICE_PREMIUM`,
-            500
-          )
+            500,
+          ),
         );
       }
 
@@ -431,8 +433,8 @@ const userController = {
         return next(
           new ErrorResponse(
             `Error al validar el Price en Stripe: ${err.message}`,
-            400
-          )
+            400,
+          ),
         );
       }
 
@@ -440,8 +442,8 @@ const userController = {
         return next(
           new ErrorResponse(
             "Price no encontrado en Stripe. Verifique el ID de precio.",
-            400
-          )
+            400,
+          ),
         );
       }
 
@@ -449,8 +451,8 @@ const userController = {
         return next(
           new ErrorResponse(
             "El Price configurado no es recurrente. Para suscripciones el Price en Stripe debe tener un campo `recurring` (usar un Price de tipo suscripción).",
-            400
-          )
+            400,
+          ),
         );
       }
       const user = await User.findByPk(userId);
