@@ -4,12 +4,19 @@ import Schedule from "../../models/Schedule.js";
 import Inscription from "../../models/Inscription.js";
 import User from "../../models/User.js";
 import Routine from "../../models/Routine.js";
+import Exercise from "../../models/Exercise.js";
 
 const inscriptionController = {
   // Create inscription (activity or schedule)
   createInscription: async (req, res) => {
     try {
-      const { userId, activityId, scheduleId, type } = req.body;
+      const { userId, activityId, scheduleId, routineId, type } = req.body;
+
+      if (!userId) {
+        return res
+          .status(400)
+          .json({ success: false, message: "User ID is required" });
+      }
 
       const user = await User.findByPk(userId);
       if (!user) {
@@ -81,7 +88,7 @@ const inscriptionController = {
 
         // User no puede tener más de un turno el mismo día
         const sameDay = userSchedules.find(
-          (insc) => insc.Schedule.day === schedule.day
+          (insc) => insc.Schedule.day === schedule.day,
         );
         if (sameDay)
           return res.status(400).json({
@@ -155,7 +162,25 @@ const inscriptionController = {
       const { userId } = req.params;
       const inscriptions = await Inscription.findAll({
         where: { userId },
-        include: [Activity, Schedule],
+        include: [
+          Activity,
+          Schedule,
+          {
+            model: Routine,
+            include: [
+              {
+                model: Exercise,
+                as: "exercises",
+                attributes: ["id", "name", "typeEx"],
+              },
+              {
+                model: User,
+                as: "professor",
+                attributes: ["first_name", "last_name"],
+              },
+            ],
+          },
+        ],
       });
       // res.json(inscriptions);
       res.json({ data: inscriptions });

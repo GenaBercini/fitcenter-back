@@ -23,9 +23,10 @@ const routinesController = {
       });
 
       if (!allRoutines.length) {
-        return res.status(404).json({
-          success: false,
+        return res.status(200).json({
+          success: true,
           msg: "No se encontraron rutinas",
+          data: [],
         });
       }
 
@@ -180,7 +181,7 @@ const routinesController = {
       if (Array.isArray(exercises) && exercises.length > 0) {
         await Exercise.update(
           { routineId: newRoutine.id },
-          { where: { id: exercises } }
+          { where: { id: exercises } },
         );
       }
 
