@@ -1,8 +1,8 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../../config/database.js';
+import { DataTypes } from "sequelize";
+import sequelize from "../../config/database.js";
 
 const Category = sequelize.define(
-  'Category',
+  "Category",
   {
     name: {
       type: DataTypes.STRING,
@@ -10,21 +10,21 @@ const Category = sequelize.define(
     },
     img: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     disabled: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
   },
-  {
-  },
+  {},
 );
 
-Category.associate = (models)=> { 
+Category.associate = (models) => {
   Category.hasMany(models.Product, {
-    foreignKey: 'categoryId',
-    as: 'products',
+    foreignKey: "categoryId",
+    as: "products",
   });
-}
+};
 
 export default Category;
