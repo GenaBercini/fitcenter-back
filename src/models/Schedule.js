@@ -29,6 +29,11 @@ const Schedule = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    disabled: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     tableName: "schedules",

@@ -2,6 +2,7 @@ import stripe from "../../../config/stripe.js";
 import Cart from "../../models/Cart.js";
 import User from "../../models/User.js";
 import ErrorResponse from "../../utils/errorConstructor.js";
+import MembershipPayment from "../../models/MembershipPayment.js";
 
 const stripeController = {
   stripeWebhook: async (req, res, next) => {
@@ -55,6 +56,24 @@ const stripeController = {
           user.membershipEndDate = endDate;
 
           await user.save();
+
+          await MembershipPayment.findOrCreate({
+            where: { stripeInvoiceId: invoice.id },
+            defaults: {
+              userId: Number(metadata.userId),
+              membershipType: metadata.membershipType,
+              amount: invoice.amount_paid || 0,
+              currency: invoice.currency || "ars",
+              status: "Paid",
+              paymentDate: new Date(invoice.status_transitions?.paid_at
+                ? invoice.status_transitions.paid_at * 1000
+                : Date.now()),
+              paymentIntentId:
+                typeof invoice.payment_intent === "string"
+                  ? invoice.payment_intent
+                  : invoice.payment_intent?.id || null,
+            },
+          });
         }
       }
     }
@@ -67,4 +86,3 @@ const stripeController = {
 };
 
 export default stripeController;
-

@@ -9,7 +9,8 @@ const productsController = {
         try {
             const allProducts = await Product.findAll({
                 where: {
-                    stock: { [Op.gte]: 1 } // Stock mayor o igual a 1
+                    stock: { [Op.gte]: 1 },
+                    ...(req.query.includeInactive === "true" ? {} : { disabled: false }),
                 },
                 include: [{
                     model: Category,
@@ -146,13 +147,25 @@ const productsController = {
             console.log("req.body", req.body);
             console.log("req.files", req.file);
 
-            const { name, price, description, stock, active, categoryId } = req.body;
-            const { filename } = req.file;
+            const { name, price, description, stock, active, disabled, categoryId } = req.body;
+            const filename = req.file?.filename;
 
-            if (!name || !price || !stock || !filename || !active || !categoryId || !description) {
+            const missingFields = [];
+            if (!name?.trim()) missingFields.push("name");
+            if (price === undefined || price === "" || Number(price) <= 0) {
+                missingFields.push("price");
+            }
+            if (stock === undefined || stock === "" || Number(stock) < 0) {
+                missingFields.push("stock");
+            }
+            if (!filename) missingFields.push("image");
+            if (!categoryId) missingFields.push("categoryId");
+            if (!description?.trim()) missingFields.push("description");
+
+            if (missingFields.length > 0) {
                 return res.status(400).json({
                     success: false,
-                    msg: "Faltan campos obligatorios"
+                    msg: `Faltan campos obligatorios: ${missingFields.join(", ")}`,
                 });
             }
 
@@ -171,7 +184,7 @@ const productsController = {
                 price,
                 description,
                 stock,
-                active,
+                disabled: disabled === "true" || active === "false" ? true : false,
                 categoryId,
                 //category: categoryFounded
             });

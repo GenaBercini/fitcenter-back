@@ -38,6 +38,11 @@ const Activity = sequelize.define(
         key: "id",
       },
     },
+    disabled: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     tableName: "activities",

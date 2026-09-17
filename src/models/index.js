@@ -4,10 +4,13 @@ import Product from "./Product.js";
 import Cart from "./Cart.js";
 import CartItem from "./CartItem.js";
 import Category from "./Category.js";
+import MembershipPayment from "./MembershipPayment.js";
 
 
 User.hasMany(Cart, { foreignKey: "userId", as: "carts" });
 Cart.belongsTo(User, { foreignKey: "userId", as: "user" });
+User.hasMany(MembershipPayment, { foreignKey: "userId", as: "membershipPayments" });
+MembershipPayment.belongsTo(User, { foreignKey: "userId", as: "user" });
 
 Cart.hasMany(CartItem, { foreignKey: "cartId", as: "items" });
 CartItem.belongsTo(Cart, { foreignKey: "cartId", as: "cart" });

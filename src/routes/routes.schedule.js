@@ -14,6 +14,7 @@ router.post("/", scheduleController.createSchedule);
 
 // PUT update schedule
 router.put("/:id", scheduleController.updateSchedule);
+router.patch("/:id", scheduleController.statusSchedule);
 
 // DELETE schedule
 router.delete("/:id", scheduleController.deleteSchedule);

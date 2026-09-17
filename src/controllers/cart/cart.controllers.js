@@ -6,6 +6,7 @@ import { calculateCartTotal } from "../../utils/calculateCartTotal.js";
 import ErrorResponse from "../../utils/errorConstructor.js";
 import stripe from "../../../config/stripe.js";
 import { fn, col, literal } from "sequelize";
+import MembershipPayment from "../../models/MembershipPayment.js";
 
 const cartController = {
   getAllCarts: async (req, res, next) => {
@@ -26,11 +27,31 @@ const cartController = {
           include: { model: Product, as: "product" },
         },
       });
+      const membershipPayments = await MembershipPayment.findAll({
+        where: { userId },
+        order: [["paymentDate", "DESC"]],
+      });
 
       res.status(200).json({
         success: true,
         msg: "Carritos obteniendo con exito",
-        data: carts,
+        data: [
+          ...carts,
+          ...membershipPayments.map((payment) => ({
+            id: `membership-${payment.id}`,
+            type: "membership",
+            membershipType: payment.membershipType,
+            total: payment.amount / 100,
+            status: payment.status,
+            paymentDate: payment.paymentDate,
+            createdAt: payment.createdAt,
+            items: [],
+          })),
+        ].sort(
+          (first, second) =>
+            new Date(second.paymentDate || second.createdAt) -
+            new Date(first.paymentDate || first.createdAt),
+        ),
       });
     } catch (error) {
       next(error);

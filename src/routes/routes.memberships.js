@@ -5,6 +5,7 @@ import membershipsController from "../controllers/memberships/memberships.contro
 router.get('/', membershipsController.getAllMemberships);
 router.get('/:id', membershipsController.getMembershipById);
 router.put('/:id', membershipsController.updateMembership);
+router.patch('/:id', membershipsController.statusMembership);
 router.post('/', membershipsController.createMembership);
 router.delete('/:id', membershipsController.deleteMembership);
 

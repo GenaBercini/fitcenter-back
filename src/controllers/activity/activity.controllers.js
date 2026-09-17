@@ -4,7 +4,12 @@ import User from "../../models/User.js";
 const activityController = {
   getAllActivities: async (req, res) => {
     try {
+      const where = {
+        ...(req.query.includeInactive === "true" ? {} : { disabled: false }),
+        ...(req.query.instructorId ? { instructorId: req.query.instructorId } : {}),
+      };
       const activities = await Activity.findAll({
+        where,
         include: [
           {
             model: User,
@@ -22,7 +27,11 @@ const activityController = {
 
   getActivityById: async (req, res) => {
     try {
-      const activity = await Activity.findByPk(req.params.id, {
+      const activity = await Activity.findOne({
+        where: {
+          id: req.params.id,
+          ...(req.query.includeInactive === "true" ? {} : { disabled: false }),
+        },
         include: [
           {
             model: User,
@@ -107,6 +116,17 @@ const activityController = {
     }
   },
 
+  statusActivity: async (req, res) => {
+    const { disabled } = req.body;
+    if (typeof disabled !== "boolean") {
+      return res.status(400).json({ message: "disabled debe ser booleano" });
+    }
+    const activity = await Activity.findByPk(req.params.id);
+    if (!activity) return res.status(404).json({ message: "Activity not found" });
+    await activity.update({ disabled });
+    res.json(activity);
+  },
+
   deleteActivity: async (req, res) => {
     try {
       const activity = await Activity.findByPk(req.params.id);
@@ -125,7 +145,7 @@ const activityController = {
       const { id } = req.params;
       const activity = await Activity.findByPk(id);
 
-      if (!activity) {
+      if (!activity || activity.disabled) {
         return res
           .status(404)
           .json({ success: false, message: "Activity not found" });

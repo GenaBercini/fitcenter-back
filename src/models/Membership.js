@@ -11,7 +11,12 @@ const Membership = sequelize.define(
     monthly_price: {
       type: DataTypes.FLOAT,
       allowNull: false,
-    }
+    },
+    disabled: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
 );
 

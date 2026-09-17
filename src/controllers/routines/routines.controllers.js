@@ -6,8 +6,12 @@ import User from "../../models/User.js";
 const routinesController = {
   getAllRoutines: async (req, res, next) => {
     try {
+      const where = {
+        ...(req.query.includeInactive === "true" ? {} : { disabled: false }),
+        ...(req.query.professorId ? { professorId: req.query.professorId } : {}),
+      };
       const allRoutines = await Routine.findAll({
-        where: { disabled: false },
+        where,
         include: [
           {
             model: Exercise,
@@ -17,7 +21,10 @@ const routinesController = {
           {
             model: User,
             as: "professor",
-            attributes: ["first_name", "last_name"],
+            attributes: ["id", "first_name", "last_name"],
+            ...(req.query.professorId
+              ? { where: { id: req.query.professorId }, required: true }
+              : {}),
           },
         ],
       });
@@ -175,7 +182,7 @@ const routinesController = {
       const newRoutine = await Routine.create({
         typeRoutine,
         descRoutine,
-        professorId,
+        professorId: professorId || null,
       });
 
       if (Array.isArray(exercises) && exercises.length > 0) {

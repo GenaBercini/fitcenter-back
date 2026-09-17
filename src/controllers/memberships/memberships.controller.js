@@ -7,7 +7,7 @@ const membershipsController = {
 
       const newMembership = await Membership.create({
         type,
-        price,
+        monthly_price: price,
       });
 
       res.status(201).json(newMembership);
@@ -18,7 +18,11 @@ const membershipsController = {
 
   getAllMemberships: async (req, res) => {
     try {
-      const memberships = await Membership.findAll();
+      const memberships = await Membership.findAll(
+        req.query.includeInactive === "true"
+          ? {}
+          : { where: { disabled: false } },
+      );
       res.json(memberships);
     } catch (error) {
       res.status(500).json({ message: "Error fetching memberships", error });
@@ -47,7 +51,7 @@ const membershipsController = {
       if (!membership)
         return res.status(404).json({ message: "Membership not found" });
 
-      await membership.update({ type, price });
+      await membership.update({ type, monthly_price: price });
       res.json({ message: "Membership updated", membership });
     } catch (error) {
       res.status(500).json({ message: "Error updating membership", error });
@@ -65,6 +69,23 @@ const membershipsController = {
       res.json({ message: "Membership deleted" });
     } catch (error) {
       res.status(500).json({ message: "Error deleting membership", error });
+    }
+  },
+
+  statusMembership: async (req, res) => {
+    try {
+      const { disabled } = req.body;
+      if (typeof disabled !== "boolean") {
+        return res.status(400).json({ message: "disabled debe ser booleano" });
+      }
+      const membership = await Membership.findByPk(req.params.id);
+      if (!membership) {
+        return res.status(404).json({ message: "Membership not found" });
+      }
+      await membership.update({ disabled });
+      res.json({ message: "Membership status updated", membership });
+    } catch (error) {
+      res.status(500).json({ message: "Error updating membership status", error });
     }
   },
 };

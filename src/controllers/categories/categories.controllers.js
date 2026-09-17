@@ -5,7 +5,11 @@ import path from "path";
 const categoriesController = {
   getAllCategories: async (req, res, next) => {
     try {
-      const allCategories = await Category.findAll({});
+      const allCategories = await Category.findAll(
+        req.query.includeInactive === "true"
+          ? {}
+          : { where: { disabled: false } },
+      );
 
       if (!allCategories) {
         return res.status(404).json({
@@ -62,19 +66,19 @@ const categoriesController = {
       console.log("req.body", req.body);
       console.log("req.files", req.file);
 
-      const { name, active } = req.body;
-      const { filename } = req.file;
+      const { name, active, disabled } = req.body;
+      const filename = req.file?.filename;
 
-      if (!name || active === undefined || !req.file) {
+      if (!name?.trim() || !filename) {
         return res.status(400).json({
           success: false,
-          msg: "Faltan campos obligatorios",
+          msg: "Faltan campos obligatorios: name o image",
         });
       }
       const newCategory = await Category.create({
         name,
         img: filename,
-        active,
+        disabled: disabled === "true" || active === "false",
       });
 
       res.status(200).json({

@@ -13,6 +13,14 @@ const Routine = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    professorId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "users",
+        key: "id",
+      },
+    },
     disabled: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

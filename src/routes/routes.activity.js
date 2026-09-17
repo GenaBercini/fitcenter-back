@@ -8,6 +8,6 @@ router.get("/:id", activityController.getActivityById);
 router.post("/", activityController.createActivity);
 router.delete("/:id", activityController.deleteActivity);
 router.put("/:id", activityController.updateActivity);
-router.delete("/:id", activityController.deleteActivity);
+router.patch("/:id", activityController.statusActivity);
 
 export default router;

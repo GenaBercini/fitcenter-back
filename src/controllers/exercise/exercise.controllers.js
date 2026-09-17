@@ -3,7 +3,14 @@ import Exercise from "../../models/Exercise.js";
 const exercisesControllers = {
   getAllExercises: async (req, res, next) => {
     try {
-      const allExercises = await Exercise.findAll();
+      const allExercises = await Exercise.findAll({
+        where: {
+          ...(req.query.includeInactive === "true" ? {} : { disabled: false }),
+          ...(req.query.professorId
+            ? { professorId: req.query.professorId }
+            : {}),
+        },
+      });
 
       if (!allExercises.length) {
         return res.status(400).json({
@@ -33,7 +40,12 @@ const exercisesControllers = {
         });
       }
 
-      const exercise = await Exercise.findByPk(id);
+      const exercise = await Exercise.findOne({
+        where: {
+          id,
+          ...(req.query.includeInactive === "true" ? {} : { disabled: false }),
+        },
+      });
 
       if (!exercise) {
         return res.status(404).json({
@@ -55,14 +67,14 @@ const exercisesControllers = {
 
   createExercise: async (req, res, next) => {
     try {
-      const { name, typeEx } = req.body;
+      const { name, typeEx, professorId } = req.body;
       if (!name || !typeEx) {
         return res.status(400).json({
           success: false,
           msg: "Faltan campos obligatorios",
         });
       }
-      const newExercise = await Exercise.create({ name, typeEx });
+      const newExercise = await Exercise.create({ name, typeEx, professorId });
 
       res.status(200).json({
         success: true,
@@ -127,6 +139,23 @@ const exercisesControllers = {
       });
     } catch (error) {
       console.log(error.message);
+      next(error);
+    }
+  },
+
+  statusExercise: async (req, res, next) => {
+    try {
+      const { disabled } = req.body;
+      if (typeof disabled !== "boolean") {
+        return res.status(400).json({ message: "disabled debe ser booleano" });
+      }
+      const exercise = await Exercise.findByPk(req.params.id);
+      if (!exercise) {
+        return res.status(404).json({ message: "Ejercicio no encontrado" });
+      }
+      await exercise.update({ disabled });
+      res.json({ success: true, data: exercise });
+    } catch (error) {
       next(error);
     }
   },

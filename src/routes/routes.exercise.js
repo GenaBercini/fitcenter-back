@@ -8,5 +8,6 @@ router.get("/:id", exercisesControllers.getExerciseByid);
 router.put("/:id", exercisesControllers.updateExercise);
 router.delete("/:id", exercisesControllers.deleteExercise);
 router.post("/", exercisesControllers.createExercise);
+router.patch("/:id", exercisesControllers.statusExercise);
 
 export default router;
