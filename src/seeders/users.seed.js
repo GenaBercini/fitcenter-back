@@ -36,6 +36,16 @@ const seedUsers = async () => {
       address: "Calle del Saber 77",
       phone: "555-3333",
     },
+       {
+     email: "instructor@example.com",
+     password: "INstructor123",
+     first_name: "Lucía",
+     last_name: "Instructora",
+     role: "instructor",
+     registration_number: "IN-5678",
+     address: "Pasaje Movimiento 45",
+     phone: "555-4444",
+   },
   ];
 
   for (const userOfSeed of usersSeed) {

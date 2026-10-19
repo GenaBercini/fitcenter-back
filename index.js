@@ -20,8 +20,11 @@ import subsidiaryRoutes from "./src/routes/routes.subsidiary.js";
 import activityRoutes from "./src/routes/routes.activity.js";
 import inscriptionRoutes from "./src/routes/routes.inscription.js";
 import cartRouter from "./src/routes/routes.cart.js";
+import contactRoutes from "./src/routes/routes.contact.js";
 import "./cron/resetTurnos.js";
 import stripeController from "./src/controllers/stripe/stripe.controllers.js"
+
+
 
 dotenv.config();
 const swaggerFile = JSON.parse(
@@ -57,6 +60,7 @@ server.use("/routines", routinesRoutes);
 server.use("/activities", activityRoutes);
 server.use("/inscription", inscriptionRoutes);
 server.use("/cart", cartRouter);
+server.use("/contact", contactRoutes);
 
 // Documentacion con Swagger
 server.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
