@@ -1,11 +1,15 @@
 import Product from "../models/Product.js";
 import Category from "../models/Category.js";
 
+// Las imágenes están en la carpeta uploads/ del back y se sirven en /uploads.
+// Los productos que se crean desde el dashboard también guardan solo el nombre del archivo.
+const OLD_SUPABASE_HOST = "cgkwvxeecaiaejwsuurm.supabase.co";
+
 const seedProducts = async () => {
   const products = [
     {
       name: "Whey Protein 2lb",
-      img: "https://cgkwvxeecaiaejwsuurm.supabase.co/storage/v1/object/public/user-images/public/143033_suplemento-dietario-whey-protein-sabor-vainilla-en-polvo-x-1000-g__imagen-1.webp",
+      img: "whey-protein.jpg",
       price: 29999,
       description: "Proteína concentrada de suero de alta calidad.",
       stock: 30,
@@ -13,7 +17,7 @@ const seedProducts = async () => {
     },
     {
       name: "Creatina Monohidratada 300g",
-      img: "https://cgkwvxeecaiaejwsuurm.supabase.co/storage/v1/object/public/user-images/public/39.avif",
+      img: "creatina.jpg",
       price: 18999,
       description: "Creatina pura para mejorar fuerza y rendimiento.",
       stock: 50,
@@ -21,7 +25,7 @@ const seedProducts = async () => {
     },
     {
       name: "Cinturón de Levantamiento",
-      img: "https://cgkwvxeecaiaejwsuurm.supabase.co/storage/v1/object/public/user-images/public/Cinturon-de-levantamiento-para-crossfit-con-abrojo.jpg",
+      img: "cinturon-levantamiento.jpg",
       price: 14999,
       description: "Cinturón reforzado para levantamiento pesado.",
       stock: 20,
@@ -29,7 +33,7 @@ const seedProducts = async () => {
     },
     {
       name: "Remera Dry Fit",
-      img: "https://cgkwvxeecaiaejwsuurm.supabase.co/storage/v1/object/public/user-images/public/17083093140d9dca4ae2c32454e5a0a83862e927ba_thumbnail_405x.webp",
+      img: "remera-dry-fit.jpg",
       price: 8999,
       description: "Remera deportiva transpirable y ligera.",
       stock: 40,
@@ -58,6 +62,13 @@ const seedProducts = async () => {
         categoryId: category.id,
       },
     });
+
+    // Los productos creados con el seed anterior apuntan al proyecto de Supabase
+    // que ya no existe. Se corrigen para que usen la imagen local.
+    if (!created && product.img?.includes(OLD_SUPABASE_HOST)) {
+      await product.update({ img: data.img });
+      console.log(`🖼️ Imagen actualizada: ${product.name}`);
+    }
 
     console.log(
       created
