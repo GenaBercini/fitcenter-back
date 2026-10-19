@@ -1661,6 +1661,16 @@
           }
         }
       }
+    },
+    "/contact/": {
+      "post": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   }
 }
