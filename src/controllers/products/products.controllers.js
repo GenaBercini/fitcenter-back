@@ -4,6 +4,17 @@ import fs from "fs";
 import path from "path";
 import { Op } from "sequelize";
 
+// Multer guarda la imagen en uploads/ antes de que corra el controlador
+// Si el producto no se llega a crear, hay que borrarla para no dejar archivos sueltos
+const removeUploadedFile = async (file) => {
+    if (!file) return;
+    try {
+        await fs.promises.unlink(file.path);
+    } catch (err) {
+        console.error("No se pudo borrar la imagen subida:", err.message);
+    }
+};
+
 const productsController = {
     getAllProducts: async (req, res, next) => {
         try {
@@ -147,9 +158,17 @@ const productsController = {
             console.log("req.files", req.file);
 
             const { name, price, description, stock, active, categoryId } = req.body;
+
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    msg: "La imagen es obligatoria"
+                });
+            }
             const { filename } = req.file;
 
-            if (!name || !price || !stock || !filename || !active || !categoryId || !description) {
+            if (!name || !price || !stock || !active || !categoryId || !description) {
+                await removeUploadedFile(req.file);
                 return res.status(400).json({
                     success: false,
                     msg: "Faltan campos obligatorios"
@@ -157,8 +176,9 @@ const productsController = {
             }
 
             const categoryFounded = await Category.findByPk(categoryId);
-            
+
             if (!categoryFounded) {
+                await removeUploadedFile(req.file);
                 return res.status(404).json({
                     success: false,
                     msg: "Categoría no encontrada"
@@ -182,6 +202,7 @@ const productsController = {
                 data: newProduct
             });
         } catch (error) {
+            await removeUploadedFile(req.file);
             console.error(error.message);
             next(error);
         }

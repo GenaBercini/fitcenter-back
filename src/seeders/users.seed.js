@@ -8,7 +8,7 @@ const seedUsers = async () => {
   const usersSeed = [
     {
       email: "admin@example.com",
-      password: "admin123",
+      password: "ADmin123",
       first_name: "Gena",
       last_name: "Admin",
       role: "admin",
@@ -18,7 +18,7 @@ const seedUsers = async () => {
     },
     {
       email: "cliente@example.com",
-      password: "cliente123",
+      password: "CLiente123",
       first_name: "María",
       last_name: "Cliente",
       role: "client",
@@ -27,7 +27,7 @@ const seedUsers = async () => {
     },
     {
       email: "profesor@example.com",
-      password: "profesor123",
+      password: "PRofesor123",
       first_name: "Carlos",
       last_name: "Profesor",
       role: "professor",
